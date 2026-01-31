@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import CopyBtn from './CopyBtn.vue'
 
 const props = defineProps({
   inputLabel: { type: String, default: '输入 (明文)' },
@@ -15,26 +14,36 @@ const props = defineProps({
 
 const emit = defineEmits(['update:inputValue', 'paste', 'clear', 'copy', 'save'])
 const activeTab = ref('UTF-8')
+const copyOk = ref(false)
+const pasteOk = ref(false)
 
 async function handlePaste() {
   try {
     const text = await navigator.clipboard.readText()
     emit('update:inputValue', text)
+    pasteOk.value = true
+    setTimeout(() => pasteOk.value = false, 1500)
   } catch {
     emit('paste')
   }
 }
 
-function copyOutput() {
-  const val = props.outputValue
+function doCopy(val) {
   if (!val) return
   const ta = document.createElement('textarea')
   ta.value = val
   ta.style.cssText = 'position:fixed;left:-9999px;opacity:0'
   document.body.appendChild(ta)
   ta.select()
+  ta.setSelectionRange(0, ta.value.length)
   try { document.execCommand('copy') } catch {}
   document.body.removeChild(ta)
+}
+
+function copyOutput() {
+  doCopy(props.outputValue)
+  copyOk.value = true
+  setTimeout(() => copyOk.value = false, 1500)
   emit('copy')
 }
 </script>
@@ -49,7 +58,7 @@ function copyOutput() {
           {{ inputLabel }}
         </span>
         <div class="flex gap-1">
-          <button class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors" @click="handlePaste">粘贴</button>
+          <button :class="['px-2 py-0.5 text-[11px] border rounded transition-colors', pasteOk ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--border)] text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)]']" @click="handlePaste">{{ pasteOk ? '✓ 已粘贴' : '粘贴' }}</button>
           <button class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors" @click="$emit('clear')">清空</button>
         </div>
       </div>
@@ -77,7 +86,7 @@ function copyOutput() {
           {{ outputLabel }}
         </span>
         <div class="flex gap-1">
-          <button class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors" @click="copyOutput">复制</button>
+          <button :class="['px-2 py-0.5 text-[11px] border rounded transition-colors', copyOk ? 'border-[var(--accent)] text-[var(--accent)]' : 'border-[var(--border)] text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)]']" @click="copyOutput">{{ copyOk ? '✓ 已复制' : '复制' }}</button>
           <button class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors" @click="$emit('save')">保存</button>
         </div>
       </div>
