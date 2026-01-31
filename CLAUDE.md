@@ -36,6 +36,10 @@ npm run preview    # 预览构建产物
 - **composables/** — useHistory（localStorage 历史记录，50 条上限）、useJsonToCode（JSON 转 13 种语言代码）
 - **assets/main.css** — 全局样式、CSS 变量（暗色主题）、设计 tokens
 
+## Git
+
+- 提交时跳过本地 git hook：`git commit --no-verify`
+
 ## Code Conventions
 
 - 页面命名：`XxxPage.vue`，组件命名：`XxxName.vue`，路由路径：kebab-case
