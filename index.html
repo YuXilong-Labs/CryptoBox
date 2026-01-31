@@ -418,27 +418,30 @@ body::before {
   top: 50%;
   transform: translateY(-50%);
   background: transparent;
-  border: 1px solid var(--card-border);
+  border: none;
   color: var(--text-secondary);
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 4px;
   border-radius: 4px;
-  font-size: 11px;
-  line-height: 1;
+  line-height: 0;
   transition: all 0.2s;
   z-index: 1;
+  opacity: 0.6;
 }
 
 .copy-key-btn:hover {
-  background: var(--green);
-  color: #fff;
-  border-color: var(--green);
+  opacity: 1;
+  color: var(--green);
 }
 
 .copy-key-btn.copied {
-  background: var(--green);
-  color: #fff;
-  border-color: var(--green);
+  color: var(--green);
+  opacity: 1;
+}
+
+.copy-key-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .menu-btn {
@@ -5929,41 +5932,45 @@ function initCopyButtons() {
     parent.insertBefore(wrapper, el);
     wrapper.appendChild(el);
     
-    // 创建复制按钮
+    const copyIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+    const checkIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    
     const btn = document.createElement('button');
     btn.className = 'copy-key-btn';
-    btn.textContent = '复制';
+    btn.innerHTML = copyIcon;
     btn.type = 'button';
-    btn.addEventListener('click', () => {
-      const val = el.value || el.textContent;
-      if (!val || val === el.placeholder) {
-        showToast('没有可复制的内容', 'warning', 1500);
+    btn.title = '复制';
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const val = el.value || el.textContent || '';
+      if (!val.trim() || val === el.placeholder) {
+        if (typeof showToast === 'function') showToast('没有可复制的内容', 'warning', 1500);
         return;
       }
-      navigator.clipboard.writeText(val).then(() => {
-        btn.textContent = '✓';
-        btn.classList.add('copied');
-        showToast('已复制到剪贴板', 'success', 1500);
-        setTimeout(() => {
-          btn.textContent = '复制';
-          btn.classList.remove('copied');
-        }, 2000);
-      }).catch(() => {
-        // fallback
-        const ta = document.createElement('textarea');
-        ta.value = val;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        btn.textContent = '✓';
-        btn.classList.add('copied');
-        showToast('已复制到剪贴板', 'success', 1500);
-        setTimeout(() => {
-          btn.textContent = '复制';
-          btn.classList.remove('copied');
-        }, 2000);
-      });
+      // 使用 execCommand 作为主要方案（兼容 file:// 协议）
+      const ta = document.createElement('textarea');
+      ta.value = val;
+      ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      ta.setSelectionRange(0, ta.value.length);
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      
+      if (!ok && navigator.clipboard) {
+        navigator.clipboard.writeText(val).catch(() => {});
+        ok = true;
+      }
+      
+      btn.innerHTML = checkIcon;
+      btn.classList.add('copied');
+      if (typeof showToast === 'function') showToast('已复制到剪贴板', 'success', 1500);
+      setTimeout(() => {
+        btn.innerHTML = copyIcon;
+        btn.classList.remove('copied');
+      }, 2000);
     });
     
     wrapper.appendChild(btn);
