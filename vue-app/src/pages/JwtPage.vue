@@ -35,12 +35,9 @@ function encode() {
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">📄</span>
-        JWT 编解码
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">JSON Web Token 解码与编码</p>
+    <div class="tool-header fade">
+      <h1>JWT 编解码</h1>
+      <p>JSON Web Token 解码与编码</p>
     </div>
 
     <div class="mb-4">
@@ -50,7 +47,7 @@ function encode() {
 
     <div class="flex gap-2 mb-4">
       <button class="px-5 py-2 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[12px] hover:brightness-110 transition cursor-pointer" @click="decode">解码 →</button>
-      <button class="px-5 py-2 border border-[var(--border)] text-[var(--text)] rounded text-[12px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="encode">← 编码</button>
+      <button class="px-5 py-2 border border-[var(--border)] text-[var(--text-1)] rounded text-[12px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="encode">← 编码</button>
     </div>
 
     <div v-if="error" class="text-red-400 text-[12px] mb-3 mono">{{ error }}</div>

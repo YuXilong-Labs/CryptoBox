@@ -30,12 +30,9 @@ function generate() {
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">🗝</span>
-        密钥生成器
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">随机字节、UUID、AES 密钥、安全密码</p>
+    <div class="tool-header fade">
+      <h1>密钥生成器</h1>
+      <p>随机字节、UUID、AES 密钥、安全密码</p>
     </div>
 
     <PillGroup :items="modes" v-model="selected" />
@@ -52,7 +49,7 @@ function generate() {
       <button class="px-5 py-2 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[12px] hover:brightness-110 transition cursor-pointer" @click="generate">生成</button>
     </div>
 
-    <div v-if="output" class="border border-[var(--border)] rounded bg-[var(--bg)] p-4">
+    <div v-if="output" class="border border-[var(--border)] rounded bg-[var(--bg-0)] p-4">
       <div class="flex items-start justify-between gap-2">
         <pre class="mono text-[12px] text-[var(--accent)] whitespace-pre-wrap break-all flex-1">{{ output }}</pre>
         <CopyBtn :value="output" />

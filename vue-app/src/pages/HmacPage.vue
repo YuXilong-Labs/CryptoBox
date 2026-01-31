@@ -26,12 +26,9 @@ function compute() {
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">#</span>
-        HMAC
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">Hash-based Message Authentication Code</p>
+    <div class="tool-header fade">
+      <h1>HMAC</h1>
+      <p>Hash-based Message Authentication Code</p>
     </div>
 
     <PillGroup :items="algos" v-model="selected" />
@@ -54,7 +51,7 @@ function compute() {
 
     <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer mb-4" @click="compute">计算 HMAC</button>
 
-    <div v-if="output" class="flex items-center gap-3 px-3 py-2.5 border border-[var(--border)] rounded bg-[var(--bg)]">
+    <div v-if="output" class="flex items-center gap-3 px-3 py-2.5 border border-[var(--border)] rounded bg-[var(--bg-0)]">
       <span class="mono text-[11px] font-semibold text-[var(--text-2)] min-w-[60px]">结果</span>
       <input :value="output" readonly class="!border-none !bg-transparent !p-0 !text-[12px] flex-1 mono" />
       <CopyBtn :value="output" />

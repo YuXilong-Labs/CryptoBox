@@ -58,7 +58,7 @@ const lines = computed(() => {
 </script>
 
 <template>
-  <div class="flex overflow-auto bg-[var(--bg)] rounded" :style="{ minHeight, maxHeight: '700px' }">
+  <div class="flex overflow-auto bg-[var(--bg-0)] rounded" :style="{ minHeight, maxHeight: '700px' }">
     <!-- Line numbers -->
     <div class="shrink-0 py-3 px-2 text-right select-none bg-[var(--bg-1)] border-r border-[var(--border)]">
       <div v-for="n in lines" :key="n" class="mono text-[12px] leading-[1.5] text-[var(--text-3)] h-[18px]">{{ n }}</div>

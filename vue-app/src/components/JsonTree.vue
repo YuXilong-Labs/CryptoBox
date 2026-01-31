@@ -70,7 +70,7 @@ export default {
         <span v-else-if="typeof data === 'string'" class="text-green-300 break-all">"{{ data }}"</span>
         <span v-else-if="typeof data === 'number'" class="text-blue-300">{{ data }}</span>
         <span v-else-if="typeof data === 'boolean'" class="text-orange-300">{{ data }}</span>
-        <span v-else class="text-[var(--text)]">{{ data }}</span>
+        <span v-else class="text-[var(--text-1)]">{{ data }}</span>
         <span class="text-[var(--text-3)]">{{ comma }}</span>
       </div>
     </template>

@@ -1,10 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import { useHistory } from '../composables/useHistory.js'
 
-const modes = ['Base64 编码', 'Base64 解码', 'Base32 编码', 'Base32 解码']
 const selected = ref('Base64 编码')
 const { save: saveHistory, getLast: getLastInput } = useHistory('base64')
 const input = ref('')
@@ -38,26 +36,33 @@ function run() {
       case 'Base32 编码': output.value = b32encode(input.value); break
       case 'Base32 解码': output.value = b32decode(input.value); break
     }
-  saveHistory(input.value)
+    saveHistory(input.value)
   } catch (e) { output.value = `错误: ${e.message}` }
 }
+
+function swap() { const t = input.value; input.value = output.value; output.value = t }
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">&lt;/&gt;</span>
-        Base64 / Base32
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">Base64 和 Base32 编解码，支持 UTF-8</p>
+    <div class="tool-header fade">
+      <h1>Base64 / Base32</h1>
+      <p>Base64 和 Base32 编解码，支持 UTF-8</p>
     </div>
 
-    <PillGroup :items="modes" v-model="selected" />
-    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入" outputLabel="输出" @clear="input = ''" />
-
-    <div class="flex items-center justify-center mt-5">
-      <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer" @click="run">转换</button>
-    </div>
+    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入" outputLabel="输出" @clear="input = ''" @swap="swap">
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label">操作</span>
+          <select class="cc-select" v-model="selected">
+            <option>Base64 编码</option><option>Base64 解码</option>
+            <option>Base32 编码</option><option>Base32 解码</option>
+          </select>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="run"><span class="btn-text">转换</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

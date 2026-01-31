@@ -1,18 +1,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
 import { useHistory } from '../composables/useHistory.js'
 
-const modes = ['DES-CBC', 'DES-ECB', '3DES-CBC', '3DES-ECB']
 const { save: saveHistory, getLast: getLastInput } = useHistory('des')
-const selectedMode = ref('DES-CBC')
 
-const algo = computed(() => selectedMode.value.startsWith('3') ? 'TripleDES' : 'DES')
-const modeStr = computed(() => selectedMode.value.split('-').pop())
-
+const algo = ref('DES')
+const modeStr = ref('CBC')
 const padding = ref('Pkcs7')
 const outputFmt = ref('Base64')
 const key = ref('')
@@ -50,62 +46,67 @@ function run(decrypt = false) {
   } catch (e) { output.value = `错误: ${e.message}` }
 }
 
-const meta = computed(() => `长度: ${output.value.length} · 编码: ${outputFmt.value} · 耗时: ${elapsed.value}ms`)
+function swap() { const t = input.value; input.value = output.value; output.value = t }
+const meta = computed(() => `${elapsed.value}ms · ${outputFmt.value} · ${output.value.length} chars`)
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        DES / 3DES 加解密
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">Data Encryption Standard — DES (64-bit) 和 Triple DES (192-bit)</p>
+    <div class="tool-header fade">
+      <h1>DES / 3DES 加解密</h1>
+      <p>Data Encryption Standard — DES (64-bit) 和 Triple DES (192-bit)</p>
     </div>
 
-    <PillGroup :items="modes" v-model="selectedMode" />
-
-    <div class="grid grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">填充</label>
-        <select v-model="padding"><option value="Pkcs7">PKCS7</option><option value="ZeroPadding">Zero</option><option value="NoPadding">None</option></select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">输出格式</label>
-        <select v-model="outputFmt"><option>Base64</option><option>Hex</option></select>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">KEY</label>
-        <div class="relative flex items-center">
-          <input v-model="key" :placeholder="algo === 'TripleDES' ? '24 bytes hex' : '8 bytes hex'" class="!pr-8" />
-          <CopyBtn :value="key" class="absolute right-1.5" />
+    <div class="key-bar fade d1">
+      <div class="key-group">
+        <span class="cfg-label">Key</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="key" :placeholder="algo === 'TripleDES' ? '24 bytes hex' : '8 bytes hex'" />
+          <CopyBtn :value="key" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="randomKey">🎲 随机</button>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">IV</label>
-        <div class="relative flex items-center">
-          <input v-model="iv" placeholder="8 bytes" :disabled="!needsIV" class="!pr-8" />
-          <CopyBtn :value="iv" class="absolute right-1.5" />
+      <div class="key-group" v-if="needsIV">
+        <span class="cfg-label">IV</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="iv" placeholder="8 bytes hex" />
+          <CopyBtn :value="iv" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="randomIV">🎲 随机</button>
       </div>
     </div>
 
-    <div class="flex gap-2 mb-4">
-      <button class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="randomKey">↻ 随机 Key</button>
-      <button v-if="needsIV" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="randomIV">↻ 随机 IV</button>
-    </div>
-
-    <IOPanel v-model:inputValue="input" :outputValue="output" :outputMeta="meta" @clear="input = ''" />
-
-    <div class="flex items-center justify-center gap-3 mt-5">
-      <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer" @click="run(false)">🔒 加密</button>
-      <span class="text-[var(--text-3)]">|</span>
-      <button class="flex items-center gap-2 px-6 py-2.5 border border-[var(--border)] text-[var(--text)] rounded text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="run(true)">🔓 解密</button>
-    </div>
+    <IOPanel v-model:inputValue="input" :outputValue="output" :outputMeta="meta" @clear="input = ''" @swap="swap">
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label">算法</span>
+          <select class="cc-select" v-model="algo">
+            <option value="DES">DES</option><option value="TripleDES">3DES</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">模式</span>
+          <select class="cc-select" v-model="modeStr">
+            <option>CBC</option><option>ECB</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">填充</span>
+          <select class="cc-select" v-model="padding">
+            <option value="Pkcs7">PKCS7</option><option value="ZeroPadding">Zero</option><option value="NoPadding">None</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">输出格式</span>
+          <select class="cc-select" v-model="outputFmt">
+            <option>Base64</option><option>Hex</option>
+          </select>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="run(false)"><span class="btn-text">加密</span></button>
+        <button class="ca-btn" @click="run(true)"><span class="btn-text">解密</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

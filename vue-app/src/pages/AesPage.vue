@@ -1,19 +1,12 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
-import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
 import { useHistory } from '../composables/useHistory.js'
 
-
-// Mode pills
-const modes = ['AES-128-CBC', 'AES-256-CBC', 'AES-128-ECB', 'AES-256-ECB', 'AES-128-CTR', 'AES-256-CTR', 'AES-128-GCM', 'AES-256-GCM']
 const { save: saveHistory, getLast: getLastInput } = useHistory('aes')
 
-const selectedMode = ref('AES-128-CBC')
-
-// Config
 const keySize = ref('128')
 const mode = ref('CBC')
 const padding = ref('Pkcs7')
@@ -24,17 +17,6 @@ const input = ref('')
 const output = ref('')
 const elapsed = ref(0)
 
-// Sync pill → config
-watch(selectedMode, (v) => {
-  const m = v.match(/AES-(\d+)-(\w+)/)
-  if (m) { keySize.value = m[1]; mode.value = m[2] }
-})
-
-// Sync config → pill
-watch([keySize, mode], () => {
-  selectedMode.value = `AES-${keySize.value}-${mode.value}`
-})
-
 onMounted(() => { input.value = getLastInput() })
 
 const needsIV = computed(() => mode.value !== 'ECB')
@@ -43,14 +25,8 @@ function randomHex(bytes) {
   return Array.from(crypto.getRandomValues(new Uint8Array(bytes)))
     .map(b => b.toString(16).padStart(2, '0')).join('')
 }
-
-function randomKey() {
-  key.value = randomHex(parseInt(keySize.value) / 8)
-}
-
-function randomIV() {
-  iv.value = randomHex(16)
-}
+function randomKey() { key.value = randomHex(parseInt(keySize.value) / 8) }
+function randomIV() { iv.value = randomHex(16) }
 
 function encrypt() {
   try {
@@ -92,120 +68,84 @@ function decrypt() {
   }
 }
 
+function swap() {
+  const tmp = input.value
+  input.value = output.value
+  output.value = tmp
+}
+
 const outputMeta = computed(() => {
   const len = output.value ? output.value.length : 0
-  return `长度: ${len} · 编码: ${outputFmt.value} · 耗时: ${elapsed.value}ms`
+  return `${elapsed.value}ms · ${outputFmt.value} · ${len} chars`
 })
 </script>
 
 <template>
   <div>
-    <!-- Header -->
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        </span>
-        AES 加解密
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">Advanced Encryption Standard — 支持 ECB / CBC / CTR / GCM 四种模式</p>
+    <div class="tool-header fade">
+      <h1>AES 加解密</h1>
+      <p>高级加密标准 · CBC / ECB / CTR / CFB / OFB</p>
     </div>
 
-    <!-- Mode Pills -->
-    <PillGroup :items="modes" v-model="selectedMode" />
-
-    <!-- Config -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">密钥长度</label>
-        <select v-model="keySize">
-          <option value="128">128 bit</option>
-          <option value="192">192 bit</option>
-          <option value="256">256 bit</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">模式</label>
-        <select v-model="mode">
-          <option>CBC</option>
-          <option>ECB</option>
-          <option>CTR</option>
-          <option>CFB</option>
-          <option>OFB</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">填充</label>
-        <select v-model="padding">
-          <option value="Pkcs7">PKCS7</option>
-          <option value="ZeroPadding">Zero</option>
-          <option value="NoPadding">None</option>
-        </select>
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">输出格式</label>
-        <select v-model="outputFmt">
-          <option>Base64</option>
-          <option>Hex</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Key / IV -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">KEY</label>
-        <div class="relative flex items-center">
-          <input v-model="key" :placeholder="`输入密钥或点击生成 (${keySize.value || keySize} bit)`" class="!pr-8" />
-          <CopyBtn :value="key" class="absolute right-1.5" />
+    <!-- Key/IV bar -->
+    <div class="key-bar fade d1">
+      <div class="key-group">
+        <span class="cfg-label">Key</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="key" :placeholder="`${keySize} bit 密钥 (Hex)`" />
+          <CopyBtn :value="key" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="randomKey">🎲 随机</button>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">IV</label>
-        <div class="relative flex items-center">
-          <input v-model="iv" placeholder="16 bytes" :disabled="!needsIV" class="!pr-8" />
-          <CopyBtn :value="iv" class="absolute right-1.5" />
+      <div class="key-group" v-if="needsIV">
+        <span class="cfg-label">IV</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="iv" placeholder="16 bytes (Hex)" />
+          <CopyBtn :value="iv" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="randomIV">🎲 随机</button>
       </div>
     </div>
 
-    <!-- Quick actions -->
-    <div class="flex gap-2 mb-4">
-      <button class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="randomKey">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3 h-3"><path d="M21 12a9 9 0 11-6.2-8.5"/><path d="M21 3v6h-6"/></svg>
-        随机 Key
-      </button>
-      <button v-if="needsIV" class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="randomIV">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-3 h-3"><path d="M21 12a9 9 0 11-6.2-8.5"/><path d="M21 3v6h-6"/></svg>
-        随机 IV
-      </button>
-    </div>
-
-    <!-- IO -->
     <IOPanel
       v-model:inputValue="input"
       :outputValue="output"
       :outputMeta="outputMeta"
       @clear="input = ''"
-    />
-
-    <!-- Actions -->
-    <div class="flex items-center justify-center gap-3 mt-5">
-      <button
-        class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer"
-        @click="encrypt"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        加密 Encrypt
-      </button>
-      <span class="text-[var(--text-3)]">|</span>
-      <button
-        class="flex items-center gap-2 px-6 py-2.5 border border-[var(--border)] text-[var(--text)] rounded text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer"
-        @click="decrypt"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5"/></svg>
-        解密 Decrypt
-      </button>
-    </div>
+      @swap="swap"
+    >
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label">密钥长度</span>
+          <select class="cc-select" v-model="keySize">
+            <option value="128">128 bit</option>
+            <option value="192">192 bit</option>
+            <option value="256">256 bit</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">模式</span>
+          <select class="cc-select" v-model="mode">
+            <option>CBC</option><option>ECB</option><option>CTR</option><option>CFB</option><option>OFB</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">填充</span>
+          <select class="cc-select" v-model="padding">
+            <option value="Pkcs7">PKCS7</option><option value="ZeroPadding">Zero</option><option value="NoPadding">None</option>
+          </select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">输出格式</span>
+          <select class="cc-select" v-model="outputFmt">
+            <option>Base64</option><option>Hex</option>
+          </select>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="encrypt"><span class="btn-text">加密</span></button>
+        <button class="ca-btn" @click="decrypt"><span class="btn-text">解密</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

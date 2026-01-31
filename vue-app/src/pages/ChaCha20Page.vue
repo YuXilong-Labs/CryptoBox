@@ -12,18 +12,15 @@ const elapsed = ref(0)
 const { save: saveHistory, getLast: getLastInput } = useHistory('chacha20')
 onMounted(() => { input.value = getLastInput() })
 
-
 function randomHex(n) {
   return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b => b.toString(16).padStart(2,'0')).join('')
 }
-
 function hexToBytes(hex) {
   const bytes = new Uint8Array(hex.length / 2)
   for (let i = 0; i < hex.length; i += 2) bytes[i/2] = parseInt(hex.substr(i,2), 16)
   return bytes
 }
 
-// ChaCha20 quarter round
 function quarterRound(s, a, b, c, d) {
   s[a] = (s[a] + s[b]) >>> 0; s[d] ^= s[a]; s[d] = (s[d] << 16) | (s[d] >>> 16)
   s[c] = (s[c] + s[d]) >>> 0; s[b] ^= s[c]; s[b] = (s[b] << 12) | (s[b] >>> 20)
@@ -54,9 +51,7 @@ function chacha20(keyHex, nonceHex, data) {
   const result = new Uint8Array(data.length)
   for (let i = 0; i < data.length; i += 64) {
     const block = chacha20Block(keyBytes, Math.floor(i / 64), nonceBytes)
-    for (let j = 0; j < 64 && i + j < data.length; j++) {
-      result[i + j] = data[i + j] ^ block[j]
-    }
+    for (let j = 0; j < 64 && i + j < data.length; j++) result[i + j] = data[i + j] ^ block[j]
   }
   return result
 }
@@ -80,46 +75,46 @@ function decrypt() {
     elapsed.value = Math.round(performance.now() - t0)
   } catch (e) { output.value = `错误: ${e.message}` }
 }
+
+function swap() { const t = input.value; input.value = output.value; output.value = t }
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">⚡</span>
-        ChaCha20
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">ChaCha20 流加密 — 256-bit key, 96-bit nonce</p>
+    <div class="tool-header fade">
+      <h1>ChaCha20</h1>
+      <p>ChaCha20 流加密 — 256-bit key, 96-bit nonce</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">KEY (256-bit Hex)</label>
-        <div class="relative flex items-center">
-          <input v-model="key" placeholder="32 bytes hex (64 chars)" class="!pr-8" />
-          <CopyBtn :value="key" class="absolute right-1.5" />
+    <div class="key-bar fade d1">
+      <div class="key-group">
+        <span class="cfg-label">Key</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="key" placeholder="32 bytes hex (64 chars)" />
+          <CopyBtn :value="key" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="key = randomHex(32)">🎲 随机</button>
       </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">NONCE (96-bit Hex)</label>
-        <div class="relative flex items-center">
-          <input v-model="nonce" placeholder="12 bytes hex (24 chars)" class="!pr-8" />
-          <CopyBtn :value="nonce" class="absolute right-1.5" />
+      <div class="key-group">
+        <span class="cfg-label">Nonce</span>
+        <div class="key-input-wrap">
+          <input class="key-input" v-model="nonce" placeholder="12 bytes hex (24 chars)" />
+          <CopyBtn :value="nonce" class="key-copy-btn" />
         </div>
+        <button class="qbtn" @click="nonce = randomHex(12)">🎲 随机</button>
       </div>
     </div>
 
-    <div class="flex gap-2 mb-4">
-      <button class="px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="key = randomHex(32)">↻ 随机 Key</button>
-      <button class="px-3 py-1.5 text-[12px] border border-[var(--border)] rounded text-[var(--text-2)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer" @click="nonce = randomHex(12)">↻ 随机 Nonce</button>
-    </div>
-
-    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入 (明文/Hex密文)" outputLabel="输出" :outputMeta="`长度: ${output.length} · ${elapsed}ms`" @clear="input = ''" />
-
-    <div class="flex items-center justify-center gap-3 mt-5">
-      <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer" @click="encrypt">🔒 加密</button>
-      <span class="text-[var(--text-3)]">|</span>
-      <button class="flex items-center gap-2 px-6 py-2.5 border border-[var(--border)] text-[var(--text)] rounded text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="decrypt">🔓 解密</button>
-    </div>
+    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入 · 明文/Hex密文" :outputMeta="`${elapsed}ms · Hex · ${output.length} chars`" @clear="input = ''" @swap="swap">
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label" style="font-size:11px;letter-spacing:0">输出为 Hex 编码</span>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="encrypt"><span class="btn-text">加密</span></button>
+        <button class="ca-btn" @click="decrypt"><span class="btn-text">解密</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

@@ -79,12 +79,9 @@ const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLan
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">{ }</span>
-        JSON 工具
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">点击操作按钮即时执行，右侧生成语法高亮代码</p>
+    <div class="tool-header fade">
+      <h1>JSON 工具</h1>
+      <p>点击操作按钮即时执行，右侧生成语法高亮代码</p>
     </div>
 
     <!-- Mode pills -->
@@ -93,7 +90,7 @@ const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLan
         v-for="m in modes" :key="m"
         :class="['px-3 py-1 text-[12px] mono rounded border transition-all duration-150 cursor-pointer',
           selected === m ? 'bg-[var(--accent)] border-[var(--accent)] text-black font-semibold'
-            : 'bg-transparent border-[var(--border)] text-[var(--text-2)] hover:border-[var(--text-3)] hover:text-[var(--text)]']"
+            : 'bg-transparent border-[var(--border)] text-[var(--text-2)] hover:border-[var(--text-3)] hover:text-[var(--text-1)]']"
         @click="selected = m; run()"
       >{{ m }}</button>
     </div>
@@ -106,7 +103,7 @@ const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLan
         </label>
         <div :class="['flex flex-col rounded overflow-hidden transition-colors duration-200 flex-1',
           isValid === true ? 'border-2 border-emerald-500/60' : isValid === false ? 'border-2 border-red-500/60' : 'border border-[var(--border)]']">
-          <div v-if="treeData && selected === '格式化'" class="bg-[var(--bg)] p-4 min-h-[500px] max-h-[700px] overflow-auto mono text-[13px] leading-[1.8] flex-1">
+          <div v-if="treeData && selected === '格式化'" class="bg-[var(--bg-0)] p-4 min-h-[500px] max-h-[700px] overflow-auto mono text-[13px] leading-[1.8] flex-1">
             <JsonTree :data="treeData" :root="true" />
           </div>
           <CodeEditor v-else v-model="input" placeholder='输入或粘贴 JSON...' minHeight="500px" />

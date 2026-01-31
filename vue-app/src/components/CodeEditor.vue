@@ -31,7 +31,7 @@ function onInput(e) {
 </script>
 
 <template>
-  <div class="flex border border-[var(--border)] rounded bg-[var(--bg)] overflow-hidden" :style="{ minHeight }">
+  <div class="flex border border-[var(--border)] rounded bg-[var(--bg-0)] overflow-hidden" :style="{ minHeight }">
     <!-- Line numbers -->
     <div
       ref="lineNums"

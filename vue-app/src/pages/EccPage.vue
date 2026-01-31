@@ -54,12 +54,9 @@ async function verify() {
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">◎</span>
-        ECC / ECDSA
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">椭圆曲线数字签名 (Web Crypto API)</p>
+    <div class="tool-header fade">
+      <h1>ECC / ECDSA</h1>
+      <p>椭圆曲线数字签名 (Web Crypto API)</p>
     </div>
 
     <PillGroup :items="curves" v-model="selectedCurve" />
@@ -88,10 +85,10 @@ async function verify() {
 
     <div class="flex gap-2 mb-4">
       <button class="px-5 py-2 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[12px] hover:brightness-110 transition cursor-pointer" @click="sign">✍️ 签名</button>
-      <button class="px-5 py-2 border border-[var(--border)] text-[var(--text)] rounded text-[12px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="verify">✔ 验签</button>
+      <button class="px-5 py-2 border border-[var(--border)] text-[var(--text-1)] rounded text-[12px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="verify">✔ 验签</button>
     </div>
 
-    <div v-if="signature" class="border border-[var(--border)] rounded bg-[var(--bg)] p-3 mb-3">
+    <div v-if="signature" class="border border-[var(--border)] rounded bg-[var(--bg-0)] p-3 mb-3">
       <div class="flex items-start justify-between gap-2">
         <div>
           <div class="text-[11px] text-[var(--text-3)] mb-1">签名 (Hex)</div>

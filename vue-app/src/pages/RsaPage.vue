@@ -1,12 +1,9 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import { useHistory } from '../composables/useHistory.js'
 
-const modes = ['加密/解密', '签名/验签']
-const selected = ref('加密/解密')
 const keySize = ref('2048')
 const keys = reactive({ publicKey: '', privateKey: '' })
 const input = ref('')
@@ -14,7 +11,6 @@ const output = ref('')
 const generating = ref(false)
 const { save: saveHistory, getLast: getLastInput } = useHistory('rsa')
 onMounted(() => { input.value = getLastInput() })
-
 
 async function generateKeys() {
   generating.value = true
@@ -57,49 +53,54 @@ async function decrypt() {
     output.value = new TextDecoder().decode(dec)
   } catch (e) { output.value = `错误: ${e.message}` }
 }
+
+function swap() { const t = input.value; input.value = output.value; output.value = t }
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="w-4 h-4"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
-        </span>
-        RSA 加解密
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">RSA-OAEP 加密/解密，基于 Web Crypto API</p>
+    <div class="tool-header fade">
+      <h1>RSA 加解密</h1>
+      <p>RSA-OAEP 加密/解密，基于 Web Crypto API</p>
     </div>
 
-    <PillGroup :items="modes" v-model="selected" />
-
-    <div class="flex gap-3 mb-4 items-end">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">密钥长度</label>
-        <select v-model="keySize" class="!w-[140px]"><option>1024</option><option>2048</option><option>4096</option></select>
-      </div>
-      <button :disabled="generating" class="flex items-center gap-2 px-4 py-2 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[12px] hover:brightness-110 transition cursor-pointer disabled:opacity-50" @click="generateKeys">
-        {{ generating ? '生成中...' : '生成密钥对' }}
-      </button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4">
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">公钥 <CopyBtn :value="keys.publicKey" /></label>
-        <textarea v-model="keys.publicKey" placeholder="RSA 公钥 (PEM)" class="!min-h-[100px] !text-[11px]" />
-      </div>
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">私钥 <CopyBtn :value="keys.privateKey" /></label>
-        <textarea v-model="keys.privateKey" placeholder="RSA 私钥 (PEM)" class="!min-h-[100px] !text-[11px]" />
+    <!-- Key pair -->
+    <div class="key-bar fade d1">
+      <div class="key-group" style="min-width:140px;flex:0">
+        <span class="cfg-label">密钥</span>
+        <select class="cc-select" v-model="keySize" style="width:100px">
+          <option>1024</option><option>2048</option><option>4096</option>
+        </select>
+        <button class="qbtn" :disabled="generating" @click="generateKeys">{{ generating ? '生成中…' : '🎲 生成' }}</button>
       </div>
     </div>
 
-    <IOPanel v-model:inputValue="input" :outputValue="output" :inputLabel="selected === '加密/解密' ? '明文' : '待签名'" :outputLabel="selected === '加密/解密' ? '密文' : '签名'" @clear="input = ''" />
-
-    <div class="flex items-center justify-center gap-3 mt-5">
-      <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer" @click="encrypt">🔒 加密</button>
-      <span class="text-[var(--text-3)]">|</span>
-      <button class="flex items-center gap-2 px-6 py-2.5 border border-[var(--border)] text-[var(--text)] rounded text-[13px] hover:border-[var(--accent)] hover:text-[var(--accent)] transition cursor-pointer" @click="decrypt">🔓 解密</button>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-4 fade d1">
+      <div class="flex flex-col gap-1">
+        <label class="cc-label flex items-center gap-2">公钥 <CopyBtn :value="keys.publicKey" /></label>
+        <textarea v-model="keys.publicKey" placeholder="RSA 公钥 (PEM)" class="!min-h-[80px] !text-[11px]" />
+      </div>
+      <div class="flex flex-col gap-1">
+        <label class="cc-label flex items-center gap-2">私钥 <CopyBtn :value="keys.privateKey" /></label>
+        <textarea v-model="keys.privateKey" placeholder="RSA 私钥 (PEM)" class="!min-h-[80px] !text-[11px]" />
+      </div>
     </div>
+
+    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入 · 明文" outputLabel="输出 · 密文" @clear="input = ''" @swap="swap">
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label">算法</span>
+          <span style="font-size:12px;color:var(--text-2);font-family:var(--mono)">RSA-OAEP</span>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">哈希</span>
+          <span style="font-size:12px;color:var(--text-2);font-family:var(--mono)">SHA-256</span>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="encrypt"><span class="btn-text">加密</span></button>
+        <button class="ca-btn" @click="decrypt"><span class="btn-text">解密</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

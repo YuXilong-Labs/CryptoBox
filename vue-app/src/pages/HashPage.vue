@@ -35,12 +35,9 @@ watch([input, outputFmt], compute)
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">#</span>
-        Hash 通用
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">MD5、SHA-1/256/512、SHA-3、RIPEMD-160 — 实时计算</p>
+    <div class="tool-header fade">
+      <h1>Hash 通用</h1>
+      <p>MD5、SHA-1/256/512、SHA-3、RIPEMD-160 — 实时计算</p>
     </div>
 
     <div class="mb-4">
@@ -58,7 +55,7 @@ watch([input, outputFmt], compute)
       <div
         v-for="r in results"
         :key="r.name"
-        class="flex items-center gap-3 px-3 py-2.5 border border-[var(--border)] rounded bg-[var(--bg)]"
+        class="flex items-center gap-3 px-3 py-2.5 border border-[var(--border)] rounded bg-[var(--bg-0)]"
       >
         <span class="mono text-[11px] font-semibold text-[var(--text-2)] min-w-[80px]">{{ r.name }}</span>
         <input :value="r.value" readonly class="!border-none !bg-transparent !p-0 !text-[11px] flex-1" />

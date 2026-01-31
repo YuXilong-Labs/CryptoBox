@@ -1,10 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import { useHistory } from '../composables/useHistory.js'
 
-const modes = ['Hex 编码', 'Hex 解码', 'URL 编码', 'URL 解码', 'Unicode 编码', 'Unicode 解码']
 const selected = ref('Hex 编码')
 const { save: saveHistory, getLast: getLastInput } = useHistory('hexurl')
 const input = ref('')
@@ -24,21 +22,31 @@ function run() {
     }
   } catch (e) { output.value = `错误: ${e.message}` }
 }
+
+function swap() { const t = input.value; input.value = output.value; output.value = t }
 </script>
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">T</span>
-        Hex / URL / Unicode
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">十六进制、URL 编码、Unicode 转义</p>
+    <div class="tool-header fade">
+      <h1>Hex / URL / Unicode</h1>
+      <p>十六进制、URL 编码、Unicode 转义</p>
     </div>
-    <PillGroup :items="modes" v-model="selected" />
-    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入" outputLabel="输出" @clear="input = ''" />
-    <div class="flex items-center justify-center mt-5">
-      <button class="flex items-center gap-2 px-6 py-2.5 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[13px] hover:brightness-110 transition cursor-pointer" @click="run">转换</button>
-    </div>
+
+    <IOPanel v-model:inputValue="input" :outputValue="output" inputLabel="输入" outputLabel="输出" @clear="input = ''" @swap="swap">
+      <template #config>
+        <div class="cc-group">
+          <span class="cc-label">操作</span>
+          <select class="cc-select" v-model="selected">
+            <option>Hex 编码</option><option>Hex 解码</option>
+            <option>URL 编码</option><option>URL 解码</option>
+            <option>Unicode 编码</option><option>Unicode 解码</option>
+          </select>
+        </div>
+      </template>
+      <template #actions>
+        <button class="ca-btn primary" @click="run"><span class="btn-text">转换</span></button>
+      </template>
+    </IOPanel>
   </div>
 </template>

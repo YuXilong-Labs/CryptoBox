@@ -38,12 +38,9 @@ async function sign() {
 
 <template>
   <div>
-    <div class="mb-6">
-      <h2 class="mono text-xl font-semibold flex items-center gap-2.5">
-        <span class="w-8 h-8 flex items-center justify-center bg-red-500/10 rounded border border-red-500/20 text-red-400">密</span>
-        SM2 国密
-      </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">SM2 椭圆曲线签名（基于 ECDSA P-256 近似实现）</p>
+    <div class="tool-header fade">
+      <h1>SM2 国密</h1>
+      <p>SM2 椭圆曲线签名（基于 ECDSA P-256 近似实现）</p>
     </div>
 
     <div class="bg-yellow-500/10 border border-yellow-500/20 rounded p-3 mb-4 text-[12px] text-yellow-400">
@@ -72,7 +69,7 @@ async function sign() {
 
     <button class="px-5 py-2 bg-[var(--accent)] border border-[var(--accent)] text-black font-semibold rounded text-[12px] hover:brightness-110 transition cursor-pointer mb-4" @click="sign">✍️ 签名</button>
 
-    <div v-if="signature" class="border border-[var(--border)] rounded bg-[var(--bg)] p-3">
+    <div v-if="signature" class="border border-[var(--border)] rounded bg-[var(--bg-0)] p-3">
       <div class="text-[11px] text-[var(--text-3)] mb-1">签名 (Hex)</div>
       <div class="mono text-[11px] text-[var(--accent)] break-all flex items-start gap-2">
         <span class="flex-1">{{ signature }}</span>

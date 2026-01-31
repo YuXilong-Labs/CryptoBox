@@ -70,7 +70,7 @@ const stats = [
         class="border border-[var(--border)] rounded-md p-5 cursor-pointer hover:border-[var(--accent)] transition-colors bg-[var(--bg-1)]"
         @click="router.push(cat.path)"
       >
-        <div class="w-9 h-9 bg-[var(--accent-dim)] rounded flex items-center justify-center text-base mb-3 text-[var(--accent)]">
+        <div class="w-9 h-9 bg-[var(--accent-soft)] rounded flex items-center justify-center text-base mb-3 text-[var(--accent)]">
           {{ cat.icon }}
         </div>
         <h3 class="mono text-sm font-semibold mb-1.5">{{ cat.title }}</h3>
