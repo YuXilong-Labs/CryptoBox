@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoBox UI v2 Preview</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --font: 'Inter', -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --transition: 150ms ease;
+  --nav-h: 48px;
+}
+[data-theme="dark"] {
+  --bg-0: #0a0a0b; --bg-1: #111113; --bg-2: #1a1a1e; --bg-3: #222226;
+  --border: rgba(255,255,255,0.06); --border-hover: rgba(255,255,255,0.1); --border-focus: rgba(255,255,255,0.15);
+  --text-0: #fafafa; --text-1: #ededef; --text-2: #8a8a8e; --text-3: #4a4a50;
+  --accent: #6d7bf7; --accent-soft: rgba(109,123,247,0.15); --accent-glow: rgba(109,123,247,0.25);
+  --green: #4ae6a0; --green-soft: rgba(74,230,160,0.12);
+  --surface-hover: rgba(255,255,255,0.03); --kbd-bg: rgba(255,255,255,0.06);
+}
+[data-theme="light"] {
+  --bg-0: #ffffff; --bg-1: #f8f8f9; --bg-2: #f0f0f2; --bg-3: #e8e8eb;
+  --border: rgba(0,0,0,0.06); --border-hover: rgba(0,0,0,0.1); --border-focus: rgba(0,0,0,0.2);
+  --text-0: #111113; --text-1: #1a1a1e; --text-2: #6e6e76; --text-3: #a0a0a8;
+  --accent: #5563e8; --accent-soft: rgba(85,99,232,0.1); --accent-glow: rgba(85,99,232,0.18);
+  --green: #2ea573; --green-soft: rgba(46,165,115,0.08);
+  --surface-hover: rgba(0,0,0,0.02); --kbd-bg: rgba(0,0,0,0.05);
+}
+html { font-size: 15px; }
+body {
+  font-family: var(--font); background: var(--bg-0); color: var(--text-1);
+  -webkit-font-smoothing: antialiased; transition: background var(--transition), color var(--transition);
+  line-height: 1.5;
+}
+::selection { background: var(--accent-soft); }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ═══ Navbar ═══ */
+.navbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: var(--nav-h); background: var(--bg-0);
+  border-bottom: 1px solid var(--border);
+  transition: background var(--transition), border var(--transition);
+}
+.navbar-inner {
+  height: 100%; display: flex; align-items: center; padding: 0 24px; gap: 16px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-weight: 600; font-size: 14px;
+  color: var(--text-0); text-decoration: none; flex-shrink: 0;
+}
+.nav-logo svg { width: 18px; height: 18px; color: var(--accent); }
+.nav-sep { width: 1px; height: 16px; background: var(--border); flex-shrink: 0; }
+
+/* Nav tabs with dropdowns */
+.nav-tabs { display: flex; gap: 1px; flex-shrink: 0; }
+.ntab-wrap { position: relative; }
+.ntab {
+  padding: 5px 12px; border-radius: 5px; border: none;
+  font-size: 13px; color: var(--text-2); cursor: pointer;
+  background: none; font-family: var(--font); white-space: nowrap;
+  transition: all var(--transition); display: flex; align-items: center; gap: 4px;
+}
+.ntab:hover { color: var(--text-0); background: var(--surface-hover); }
+.ntab.active { color: var(--text-0); }
+.ntab .chev { width: 8px; height: 8px; opacity: 0.4; transition: transform 0.2s, opacity 0.2s; }
+.ntab:hover .chev { opacity: 0.7; }
+.ntab-wrap.open .chev { transform: rotate(180deg); opacity: 0.7; }
+
+/* Dropdown panel */
+.ndrop {
+  position: absolute; top: calc(100% + 10px); left: 0;
+  min-width: 220px; padding: 6px;
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  opacity: 0; visibility: hidden; transform: translateY(-4px);
+  transition: all 0.15s ease; z-index: 200;
+}
+.ntab-wrap.open .ndrop { opacity: 1; visibility: visible; transform: translateY(0); }
+.ndrop-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px;
+  color: var(--text-2); font-size: 13px; cursor: pointer;
+  transition: all 0.1s; text-decoration: none;
+}
+.ndrop-item:hover { background: var(--accent-soft); color: var(--accent); }
+.ndrop-item .nd-tag {
+  font-family: var(--mono); font-size: 10px; color: var(--text-3); margin-left: auto;
+}
+
+/* Search in navbar */
+.nav-search-wrap { position: relative; flex: 1; max-width: 280px; }
+.nav-search {
+  width: 100%; padding: 6px 10px 6px 30px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg-1);
+  color: var(--text-1); font-size: 12.5px; font-family: var(--font);
+  outline: none; transition: all var(--transition);
+}
+.nav-search::placeholder { color: var(--text-3); }
+.nav-search:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); background: var(--bg-0); }
+.nav-search-icon {
+  position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+  color: var(--text-3); width: 14px; height: 14px; pointer-events: none;
+}
+.nav-search-kbd {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  font-family: var(--mono); font-size: 10px; color: var(--text-3);
+  background: var(--kbd-bg); padding: 1px 5px; border-radius: 3px;
+  border: 1px solid var(--border); pointer-events: none;
+  transition: opacity 0.15s;
+}
+.nav-search:focus ~ .nav-search-kbd { opacity: 0; }
+
+/* Search results dropdown */
+.search-results {
+  position: absolute; top: calc(100% + 6px); left: 0; right: 0;
+  background: var(--bg-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+  padding: 6px; display: none; z-index: 300; max-height: 320px; overflow-y: auto;
+}
+.search-results.visible { display: block; }
+.sr-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 6px;
+  color: var(--text-2); font-size: 13px; cursor: pointer;
+  transition: all 0.1s;
+}
+.sr-item:hover { background: var(--accent-soft); color: var(--accent); }
+.sr-item .sr-cat { font-size: 10px; color: var(--text-3); margin-left: auto; font-family: var(--mono); }
+.sr-empty { padding: 12px; text-align: center; font-size: 12px; color: var(--text-3); }
+.sr-highlight { color: var(--accent); font-weight: 600; }
+
+.nav-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; margin-left: auto; }
+.nav-btn {
+  width: 32px; height: 32px; border-radius: 6px; border: 1px solid transparent;
+  background: none; cursor: pointer; color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; transition: all var(--transition);
+}
+.nav-btn:hover { color: var(--text-0); border-color: var(--border); background: var(--surface-hover); }
+
+/* ═══ Main ═══ */
+.main { padding: calc(var(--nav-h) + 24px) 32px 40px; }
+
+/* ═══ Tool Page ═══ */
+.tool-header { margin-bottom: 20px; }
+.tool-header h1 {
+  font-size: 22px; font-weight: 600; color: var(--text-0);
+  letter-spacing: -0.3px; margin-bottom: 2px;
+}
+.tool-header p { font-size: 13px; color: var(--text-2); }
+
+/* Key/IV bar */
+.key-bar { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+.key-group { display: flex; align-items: center; gap: 6px; flex: 1; min-width: 200px; }
+.cfg-label { font-size: 12px; color: var(--text-3); font-weight: 500; white-space: nowrap; }
+.key-input-wrap { position: relative; flex: 1; }
+.key-input {
+  width: 100%; padding: 7px 32px 7px 10px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--bg-1); color: var(--text-1);
+  font-size: 12px; font-family: var(--mono); outline: none; transition: border var(--transition);
+}
+.key-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+.key-copy-btn {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer; color: var(--text-3);
+  font-size: 11px; padding: 2px; transition: color 0.1s;
+}
+.key-copy-btn:hover { color: var(--accent); }
+.qbtn {
+  padding: 5px 10px; border-radius: 5px; font-size: 11px;
+  border: 1px solid var(--border); background: none; color: var(--text-2);
+  cursor: pointer; font-family: var(--mono); transition: all var(--transition); white-space: nowrap;
+}
+.qbtn:hover { border-color: var(--border-hover); color: var(--text-1); background: var(--surface-hover); }
+.qbtn:active { transform: scale(0.97); }
+
+/* IO 3-column layout */
+.io-layout { display: grid; grid-template-columns: 1fr 180px 1fr; gap: 0; align-items: stretch; }
+.io-layout .io-box { min-height: calc(100vh - 200px); display: flex; flex-direction: column; }
+.io-layout .io-area { flex: 1; min-height: 0; }
+.io-box {
+  border-radius: var(--radius-lg); border: 1px solid var(--border);
+  background: var(--bg-1); overflow: hidden; transition: border var(--transition);
+  display: flex; flex-direction: column;
+}
+.io-box:focus-within { border-color: var(--border-focus); }
+.io-top {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; border-bottom: 1px solid var(--border);
+}
+.io-title {
+  font-size: 12px; font-weight: 600; color: var(--text-2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  display: flex; align-items: center; gap: 6px;
+}
+.io-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); }
+.io-dot.out { background: var(--green); }
+.io-btns { display: flex; gap: 2px; }
+.io-btn {
+  padding: 4px 10px; border-radius: 4px; border: none;
+  background: none; color: var(--text-3); font-size: 12px;
+  cursor: pointer; transition: all 0.1s;
+}
+.io-btn:hover { color: var(--text-1); background: var(--surface-hover); }
+.io-area {
+  width: 100%; padding: 14px; flex: 1;
+  background: transparent; border: none; resize: none;
+  color: var(--text-1); font-family: var(--mono); font-size: 13.5px;
+  line-height: 1.65; outline: none;
+}
+.io-area::placeholder { color: var(--text-3); }
+.io-area.output { color: var(--green); }
+.io-footer { padding: 8px 14px; border-top: 1px solid var(--border); display: flex; gap: 0; }
+.io-ftab {
+  padding: 3px 8px; border-radius: 4px; border: none;
+  background: none; color: var(--text-3); font-size: 11px;
+  font-family: var(--mono); cursor: pointer; transition: all 0.1s;
+}
+.io-ftab:hover { color: var(--text-2); }
+.io-ftab.active { color: var(--accent); background: var(--accent-soft); }
+.io-meta {
+  padding: 8px 14px; border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--text-3); font-family: var(--mono);
+}
+
+/* Center column */
+.io-center { display: flex; flex-direction: column; padding: 0 12px; justify-content: space-between; }
+.center-config { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }
+.cc-group { display: flex; flex-direction: column; gap: 3px; }
+.cc-label { font-size: 10px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
+.cc-select {
+  width: 100%; padding: 6px 8px; border-radius: 5px;
+  border: 1px solid var(--border); background: var(--bg-1);
+  color: var(--text-1); font-size: 12px; font-family: var(--mono);
+  outline: none; appearance: none; cursor: pointer; transition: border var(--transition);
+}
+.cc-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-glow); }
+.center-actions { display: flex; flex-direction: column; gap: 6px; padding-bottom: 12px; }
+.ca-btn {
+  width: 100%; padding: 8px 0; border-radius: 7px;
+  border: 1px solid var(--border); background: var(--bg-1);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text-2); font-size: 13px; font-weight: 600; font-family: var(--font);
+  transition: all var(--transition);
+}
+.ca-btn:hover { border-color: var(--border-hover); color: var(--text-0); background: var(--bg-2); }
+.ca-btn:active { transform: scale(0.97); }
+.ca-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.ca-btn.primary:hover { filter: brightness(1.1); }
+.ca-btn .spinner {
+  display: none; width: 14px; height: 14px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: spin 0.6s linear infinite;
+}
+.ca-btn.loading .spinner { display: block; }
+.ca-btn.loading .btn-text { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.ca-swap {
+  width: 100%; padding: 6px 0; border-radius: 6px;
+  border: 1px solid var(--border); background: none;
+  cursor: pointer; color: var(--text-3); font-size: 16px;
+  transition: all var(--transition); text-align: center;
+}
+.ca-swap:hover { color: var(--text-1); border-color: var(--border-hover); background: var(--surface-hover); }
+.ca-swap:active { transform: scale(0.95); }
+
+/* ═══ Animations ═══ */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.fade { animation: fadeIn 0.25s ease both; }
+.d1 { animation-delay: 0.03s; } .d2 { animation-delay: 0.06s; } .d3 { animation-delay: 0.09s; }
+
+@media (max-width: 768px) {
+  .nav-tabs { display: none; }
+  .nav-search-wrap { max-width: 100%; }
+  .io-layout { grid-template-columns: 1fr; }
+  .io-layout .io-box { min-height: 250px; }
+  .io-center { flex-direction: row; flex-wrap: wrap; padding: 12px 0; gap: 8px; }
+  .center-config, .center-actions { flex-direction: row; flex-wrap: wrap; gap: 8px; }
+  .key-bar { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a class="nav-logo" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+      CryptoBox
+    </a>
+    <div class="nav-sep"></div>
+
+    <div class="nav-tabs">
+      <div class="ntab-wrap" onclick="toggleDrop(this)">
+        <button class="ntab active">对称加密 <svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></button>
+        <div class="ndrop">
+          <div class="ndrop-item" onclick="navTo('AES 加解密')">AES<span class="nd-tag">4 modes</span></div>
+          <div class="ndrop-item" onclick="navTo('DES')">DES / 3DES</div>
+          <div class="ndrop-item" onclick="navTo('ChaCha20')">ChaCha20</div>
+          <div class="ndrop-item" onclick="navTo('Blowfish')">Blowfish</div>
+          <div class="ndrop-item" onclick="navTo('RC4')">RC4</div>
+          <div class="ndrop-item" onclick="navTo('SM4')">SM4<span class="nd-tag">国密</span></div>
+        </div>
+      </div>
+      <div class="ntab-wrap" onclick="toggleDrop(this)">
+        <button class="ntab">非对称加密 <svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></button>
+        <div class="ndrop">
+          <div class="ndrop-item" onclick="navTo('RSA')">RSA<span class="nd-tag">加密/签名</span></div>
+          <div class="ndrop-item" onclick="navTo('ECC')">ECC / ECDSA</div>
+          <div class="ndrop-item" onclick="navTo('Ed25519')">Ed25519</div>
+          <div class="ndrop-item" onclick="navTo('SM2')">SM2<span class="nd-tag">国密</span></div>
+        </div>
+      </div>
+      <div class="ntab-wrap" onclick="toggleDrop(this)">
+        <button class="ntab">哈希 <svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></button>
+        <div class="ndrop">
+          <div class="ndrop-item" onclick="navTo('哈希')">哈希<span class="nd-tag">12+ 算法</span></div>
+          <div class="ndrop-item" onclick="navTo('HMAC')">HMAC</div>
+          <div class="ndrop-item" onclick="navTo('密码哈希')">密码哈希<span class="nd-tag">bcrypt</span></div>
+        </div>
+      </div>
+      <div class="ntab-wrap" onclick="toggleDrop(this)">
+        <button class="ntab">编码 <svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></button>
+        <div class="ndrop">
+          <div class="ndrop-item" onclick="navTo('Base64')">Base64 / Base32</div>
+          <div class="ndrop-item" onclick="navTo('Hex')">Hex / URL 编码</div>
+          <div class="ndrop-item" onclick="navTo('JWT')">JWT</div>
+        </div>
+      </div>
+      <div class="ntab-wrap" onclick="toggleDrop(this)">
+        <button class="ntab">工具 <svg class="chev" viewBox="0 0 10 10"><path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.3" fill="none"/></svg></button>
+        <div class="ndrop">
+          <div class="ndrop-item" onclick="navTo('JSON 工具')">JSON 工具</div>
+          <div class="ndrop-item" onclick="navTo('密钥生成器')">密钥生成器</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="nav-search-wrap">
+      <svg class="nav-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="nav-search" id="searchInput" type="text" placeholder="搜索算法…" oninput="onSearch(this.value)" onfocus="onSearch(this.value)" onblur="setTimeout(()=>hideSearch(),150)">
+      <span class="nav-search-kbd">⌘K</span>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <div class="nav-right">
+      <button class="nav-btn" onclick="toggleTheme()" id="themeBtn" title="切换主题">🌙</button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="main">
+  <div class="tool-header fade">
+    <h1 id="pageTitle">AES 加解密</h1>
+    <p id="pageDesc">高级加密标准 · CBC / ECB / CTR / GCM</p>
+  </div>
+
+  <div class="key-bar fade d1">
+    <div class="key-group">
+      <span class="cfg-label">Key</span>
+      <div class="key-input-wrap">
+        <input class="key-input" value="a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6" readonly>
+        <button class="key-copy-btn">📋</button>
+      </div>
+      <button class="qbtn">🎲 随机</button>
+    </div>
+    <div class="key-group">
+      <span class="cfg-label">IV</span>
+      <div class="key-input-wrap">
+        <input class="key-input" value="f0e1d2c3b4a59687" readonly>
+        <button class="key-copy-btn">📋</button>
+      </div>
+      <button class="qbtn">🎲 随机</button>
+    </div>
+  </div>
+
+  <div class="io-layout fade d2">
+    <div class="io-box">
+      <div class="io-top">
+        <div class="io-title"><div class="io-dot"></div>输入 · 明文</div>
+        <div class="io-btns">
+          <button class="io-btn">粘贴</button>
+          <button class="io-btn">清空</button>
+        </div>
+      </div>
+      <textarea class="io-area" placeholder="输入明文…">Hello, CryptoBox!</textarea>
+      <div class="io-footer">
+        <button class="io-ftab active">UTF-8</button>
+        <button class="io-ftab">Hex</button>
+        <button class="io-ftab">Base64</button>
+      </div>
+    </div>
+
+    <div class="io-center">
+      <div class="center-config">
+        <div class="cc-group">
+          <span class="cc-label">密钥长度</span>
+          <select class="cc-select"><option>128 bit</option><option selected>256 bit</option></select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">模式</span>
+          <select class="cc-select"><option selected>CBC</option><option>ECB</option><option>CTR</option><option>GCM</option></select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">填充</span>
+          <select class="cc-select"><option selected>PKCS7</option><option>Zero</option></select>
+        </div>
+        <div class="cc-group">
+          <span class="cc-label">输出格式</span>
+          <select class="cc-select"><option selected>Base64</option><option>Hex</option></select>
+        </div>
+      </div>
+      <div class="center-actions">
+        <button class="ca-btn primary" onclick="demoLoading(this)"><span class="btn-text">加密</span><span class="spinner"></span></button>
+        <button class="ca-btn" onclick="demoLoading(this)"><span class="btn-text">解密</span><span class="spinner"></span></button>
+        <button class="ca-swap" title="交换">⇄</button>
+      </div>
+    </div>
+
+    <div class="io-box">
+      <div class="io-top">
+        <div class="io-title"><div class="io-dot out"></div>输出 · 密文</div>
+        <div class="io-btns">
+          <button class="io-btn">复制</button>
+          <button class="io-btn">保存</button>
+        </div>
+      </div>
+      <textarea class="io-area output" readonly placeholder="密文…">U2FsdGVkX1+vupppZksvRf5pq5g5XjFRIipRkwB0K1Y=</textarea>
+      <div class="io-meta">0.3ms · Base64 · 44 chars</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// All tools data for search
+const tools = [
+  { name: 'AES', desc: 'CBC/ECB/CTR/GCM', cat: '对称加密' },
+  { name: 'DES / 3DES', desc: '分组加密', cat: '对称加密' },
+  { name: 'ChaCha20', desc: '流式加密', cat: '对称加密' },
+  { name: 'Blowfish', desc: '变长密钥', cat: '对称加密' },
+  { name: 'RC4', desc: '流密码', cat: '对称加密' },
+  { name: 'SM4', desc: '国密标准', cat: '对称加密' },
+  { name: 'RSA', desc: '加密/签名/验签', cat: '非对称加密' },
+  { name: 'ECC / ECDSA', desc: '椭圆曲线', cat: '非对称加密' },
+  { name: 'Ed25519', desc: '数字签名', cat: '非对称加密' },
+  { name: 'SM2', desc: '国密标准', cat: '非对称加密' },
+  { name: '哈希', desc: 'MD5/SHA/SM3/BLAKE', cat: '哈希' },
+  { name: 'HMAC', desc: '消息认证码', cat: '哈希' },
+  { name: '密码哈希', desc: 'bcrypt/PBKDF2', cat: '哈希' },
+  { name: 'Base64 / Base32', desc: '编码解码', cat: '编码' },
+  { name: 'Hex / URL', desc: '编码转换', cat: '编码' },
+  { name: 'JWT', desc: '解码/验证', cat: '编码' },
+  { name: 'JSON 工具', desc: '格式化/代码生成', cat: '工具' },
+  { name: '密钥生成器', desc: 'RSA/AES/UUID', cat: '工具' },
+];
+
+function onSearch(q) {
+  const box = document.getElementById('searchResults');
+  q = q.trim().toLowerCase();
+  if (!q) { box.classList.remove('visible'); return; }
+  const matches = tools.filter(t =>
+    t.name.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q) || t.cat.includes(q)
+  );
+  if (matches.length === 0) {
+    box.innerHTML = '<div class="sr-empty">无匹配结果</div>';
+  } else {
+    box.innerHTML = matches.map(t => {
+      const hl = t.name.replace(new RegExp(`(${q})`, 'gi'), '<span class="sr-highlight">$1</span>');
+      return `<div class="sr-item" onmousedown="navTo('${t.name}')">${hl}<span class="sr-cat">${t.cat}</span></div>`;
+    }).join('');
+  }
+  box.classList.add('visible');
+}
+function hideSearch() { document.getElementById('searchResults').classList.remove('visible'); }
+
+function navTo(name) {
+  document.getElementById('pageTitle').textContent = name;
+  document.getElementById('pageDesc').textContent = '已跳转到 ' + name + ' 工具页';
+  // Close all dropdowns
+  document.querySelectorAll('.ntab-wrap').forEach(w => w.classList.remove('open'));
+  document.getElementById('searchInput').value = '';
+  hideSearch();
+}
+
+// Dropdown toggle (click-based, not hover)
+function toggleDrop(wrap) {
+  const wasOpen = wrap.classList.contains('open');
+  document.querySelectorAll('.ntab-wrap').forEach(w => w.classList.remove('open'));
+  if (!wasOpen) wrap.classList.add('open');
+}
+// Close dropdowns on outside click
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.ntab-wrap')) {
+    document.querySelectorAll('.ntab-wrap').forEach(w => w.classList.remove('open'));
+  }
+});
+
+function toggleTheme() {
+  const h = document.documentElement, b = document.getElementById('themeBtn');
+  if (h.dataset.theme === 'dark') { h.dataset.theme = 'light'; b.textContent = '☀️'; }
+  else { h.dataset.theme = 'dark'; b.textContent = '🌙'; }
+}
+
+function demoLoading(btn) {
+  btn.classList.add('loading'); btn.disabled = true;
+  setTimeout(() => { btn.classList.remove('loading'); btn.disabled = false; }, 1200);
+}
+
+document.querySelectorAll('.io-ftab').forEach(t => t.addEventListener('click', () => {
+  t.parentElement.querySelectorAll('.io-ftab').forEach(x => x.classList.remove('active')); t.classList.add('active');
+}));
+
+// ⌘K shortcut
+document.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault(); document.getElementById('searchInput').focus();
+  }
+});
+</script>
+</body>
+</html>
