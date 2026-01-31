@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDE68A"/>
+      <stop offset="50%" style="stop-color:#F59E0B"/>
+      <stop offset="100%" style="stop-color:#D97706"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22D3EE"/>
+      <stop offset="100%" style="stop-color:#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="shield-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(6,182,212,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(6,182,212,0.03)"/>
+    </linearGradient>
+    <filter id="glow-c">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feFlood flood-color="#22D3EE" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-g">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feFlood flood-color="#F59E0B" flood-opacity="0.4" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+
+  <!-- Shield -->
+  <path d="M128 28 L212 64 Q220 68 220 78 L220 148 Q220 200 128 238 Q36 200 36 148 L36 78 Q36 68 44 64 Z" 
+        fill="url(#shield-fill)" stroke="url(#cyan)" stroke-width="2.5" filter="glow-c"/>
+
+  <!-- Lock -->
+  <g filter="glow-g" transform="translate(128,128)">
+    <!-- Shackle -->
+    <path d="M-28,-38 L-28,-58 Q-28,-84 0,-84 Q28,-84 28,-58 L28,-38" 
+          fill="none" stroke="url(#gold)" stroke-width="10" stroke-linecap="round"/>
+    <!-- Body -->
+    <rect x="-40" y="-42" width="80" height="64" rx="10" ry="10" fill="url(#gold)"/>
+    <!-- Inner shadow -->
+    <rect x="-34" y="-36" width="68" height="52" rx="7" ry="7" fill="rgba(0,0,0,0.12)"/>
+    <!-- Keyhole -->
+    <circle cx="0" cy="-20" r="9" fill="#0a0a0f"/>
+    <path d="M-5,-13 L-7,4 L7,4 L5,-13" fill="#0a0a0f"/>
+  </g>
+
+  <!-- Corner nodes -->
+  <g filter="glow-c">
+    <circle cx="128" cy="28" r="3.5" fill="#22D3EE"/>
+    <circle cx="212" cy="64" r="3" fill="#22D3EE" opacity="0.7"/>
+    <circle cx="44" cy="64" r="3" fill="#22D3EE" opacity="0.7"/>
+    <circle cx="128" cy="238" r="3.5" fill="#22D3EE" opacity="0.6"/>
+  </g>
+</svg>

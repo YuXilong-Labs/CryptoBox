@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FDE68A"/>
+      <stop offset="50%" style="stop-color:#F59E0B"/>
+      <stop offset="100%" style="stop-color:#D97706"/>
+    </linearGradient>
+    <linearGradient id="cyan" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22D3EE"/>
+      <stop offset="100%" style="stop-color:#06B6D4"/>
+    </linearGradient>
+    <linearGradient id="shield-fill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(6,182,212,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(6,182,212,0.03)"/>
+    </linearGradient>
+    <filter id="glow-c">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feFlood flood-color="#22D3EE" flood-opacity="0.5" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="glow-g">
+      <feGaussianBlur stdDeviation="6" result="b"/>
+      <feFlood flood-color="#F59E0B" flood-opacity="0.4" result="c"/>
+      <feComposite in="c" in2="b" operator="in" result="g"/>
+      <feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <pattern id="grid" x="0" y="0" width="48" height="48" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="24" x2="16" y2="24" stroke="rgba(6,182,212,0.05)" stroke-width="0.8"/>
+      <line x1="24" y1="0" x2="24" y2="16" stroke="rgba(6,182,212,0.05)" stroke-width="0.8"/>
+      <circle cx="24" cy="24" r="1.2" fill="rgba(6,182,212,0.07)"/>
+      <line x1="32" y1="24" x2="48" y2="24" stroke="rgba(6,182,212,0.05)" stroke-width="0.8"/>
+      <line x1="24" y1="32" x2="24" y2="48" stroke="rgba(6,182,212,0.05)" stroke-width="0.8"/>
+    </pattern>
+  </defs>
+
+  <!-- Background matching dark-svg.html -->
+  <rect width="512" height="512" rx="96" ry="96" fill="#0a0a0f"/>
+  <rect width="512" height="512" rx="96" ry="96" fill="url(#grid)"/>
+
+  <!-- Outer hex ring -->
+  <polygon points="256,62 406,130 440,272 406,382 256,450 106,382 72,272 106,130" 
+           fill="none" stroke="rgba(6,182,212,0.08)" stroke-width="1.2"/>
+
+  <!-- Shield -->
+  <path d="M256 100 L368 148 Q378 153 378 165 L378 260 Q378 332 256 396 Q134 332 134 260 L134 165 Q134 153 144 148 Z" 
+        fill="url(#shield-fill)" stroke="url(#cyan)" stroke-width="2.5" filter="glow-c"/>
+
+  <!-- Data streams -->
+  <g opacity="0.5">
+    <line x1="50" y1="200" x2="134" y2="195" stroke="#06B6D4" stroke-width="1" stroke-dasharray="3,5"/>
+    <line x1="55" y1="280" x2="134" y2="262" stroke="#06B6D4" stroke-width="1" stroke-dasharray="3,5"/>
+    <line x1="378" y1="195" x2="462" y2="200" stroke="#06B6D4" stroke-width="1" stroke-dasharray="3,5"/>
+    <line x1="378" y1="262" x2="457" y2="280" stroke="#06B6D4" stroke-width="1" stroke-dasharray="3,5"/>
+  </g>
+
+  <!-- Lock -->
+  <g filter="glow-g" transform="translate(256,248)">
+    <path d="M-42,-52 L-42,-76 Q-42,-108 0,-108 Q42,-108 42,-76 L42,-52" 
+          fill="none" stroke="url(#gold)" stroke-width="13" stroke-linecap="round"/>
+    <rect x="-56" y="-56" width="112" height="88" rx="14" ry="14" fill="url(#gold)"/>
+    <rect x="-48" y="-48" width="96" height="72" rx="10" ry="10" fill="rgba(0,0,0,0.12)"/>
+    <circle cx="0" cy="-24" r="12" fill="#0a0a0f"/>
+    <path d="M-6,-15 L-9,6 L9,6 L6,-15" fill="#0a0a0f"/>
+  </g>
+
+  <!-- Nodes -->
+  <g filter="glow-c">
+    <circle cx="256" cy="62" r="4.5" fill="#22D3EE"/>
+    <circle cx="406" cy="130" r="3.5" fill="#22D3EE" opacity="0.6"/>
+    <circle cx="106" cy="130" r="3.5" fill="#22D3EE" opacity="0.6"/>
+    <circle cx="256" cy="450" r="4.5" fill="#22D3EE" opacity="0.5"/>
+    <circle cx="50" cy="200" r="3" fill="#22D3EE" opacity="0.7"/>
+    <circle cx="55" cy="280" r="3" fill="#22D3EE" opacity="0.7"/>
+    <circle cx="462" cy="200" r="3" fill="#22D3EE" opacity="0.7"/>
+    <circle cx="457" cy="280" r="3" fill="#22D3EE" opacity="0.7"/>
+  </g>
+
+  <!-- Subtle hex text -->
+  <g fill="rgba(6,182,212,0.1)" font-family="'SF Mono',monospace" font-size="11">
+    <text x="78" y="145">0x</text>
+    <text x="405" y="400">FF</text>
+  </g>
+</svg>

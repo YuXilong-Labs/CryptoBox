@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptoBox — 扁平化设计</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f6f8;
+  --bg-white: #ffffff;
+  --bg-hover: #f0f1f3;
+  --bg-sidebar: #1e1f2b;
+  --bg-sidebar-hover: rgba(255,255,255,0.06);
+  --bg-sidebar-active: rgba(255,255,255,0.1);
+  --border: #e5e7eb;
+  --border-light: #f0f0f0;
+  --text: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+  --text-sidebar: #a0a3b1;
+  --text-sidebar-active: #ffffff;
+  --accent: #4f46e5;
+  --accent-light: #6366f1;
+  --accent-bg: #eef2ff;
+  --accent-border: #c7d2fe;
+  --green: #059669;
+  --green-bg: #ecfdf5;
+  --green-border: #a7f3d0;
+  --orange: #d97706;
+  --orange-bg: #fffbeb;
+  --orange-border: #fde68a;
+  --red: #dc2626;
+  --red-bg: #fef2f2;
+  --cyan: #0891b2;
+  --cyan-bg: #ecfeff;
+  --cyan-border: #a5f3fc;
+  --pink: #db2777;
+  --pink-bg: #fdf2f8;
+  --radius: 8px;
+  --radius-lg: 12px;
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.04);
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', monospace;
+  --transition: 0.15s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 14px; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+/* ── SVG Icon System ── */
+.icon-svg {
+  width: 18px; height: 18px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.icon-svg.lg { width: 24px; height: 24px; }
+.icon-svg.xl { width: 32px; height: 32px; }
+
+/* ── Layout ── */
+.app { display: flex; min-height: 100vh; }
+
+/* ── Sidebar (Dark) ── */
+.sidebar {
+  width: 240px; min-width: 240px;
+  background: var(--bg-sidebar);
+  display: flex; flex-direction: column;
+  position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+}
+
+.sidebar-header {
+  padding: 20px 16px 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.sidebar-logo {
+  display: flex; align-items: center; gap: 10px;
+}
+
+.sidebar-logo .logo-mark {
+  width: 32px; height: 32px;
+  background: var(--accent);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.sidebar-logo .logo-mark svg {
+  width: 18px; height: 18px; stroke: #fff; fill: none;
+  stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+}
+
+.sidebar-logo .logo-text {
+  font-size: 16px; font-weight: 700; color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.sidebar-logo .logo-version {
+  font-size: 10px; color: var(--text-sidebar);
+  margin-top: 1px;
+}
+
+.sidebar-search {
+  padding: 10px 12px;
+}
+
+.sidebar-search input {
+  width: 100%; padding: 7px 10px 7px 32px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 6px; color: #fff; font-size: 12.5px;
+  outline: none; transition: var(--transition);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round'%3E%3Ccircle cx='6' cy='6' r='4.5'/%3E%3Cline x1='9.5' y1='9.5' x2='13' y2='13'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: 10px center;
+}
+.sidebar-search input::placeholder { color: rgba(255,255,255,0.3); }
+.sidebar-search input:focus { border-color: var(--accent); background-color: rgba(255,255,255,0.08); }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 2px 8px; }
+.sidebar-nav::-webkit-scrollbar { width: 3px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+.nav-group { margin-bottom: 2px; }
+.nav-group-label {
+  font-size: 10px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.06em; color: rgba(255,255,255,0.25);
+  padding: 14px 10px 6px;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: 6px;
+  cursor: pointer; transition: var(--transition);
+  color: var(--text-sidebar); font-size: 13px; font-weight: 450;
+}
+.nav-item:hover { background: var(--bg-sidebar-hover); color: #d1d5db; }
+.nav-item.active { background: var(--bg-sidebar-active); color: var(--text-sidebar-active); }
+.nav-item .nav-icon { width: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.nav-item .nav-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.nav-item .badge {
+  margin-left: auto; font-size: 10px; padding: 1px 6px;
+  border-radius: 4px; background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4); font-weight: 500;
+}
+.nav-item.active .badge { background: rgba(79,70,229,0.3); color: #a5b4fc; }
+
+/* ── Main ── */
+.main { flex: 1; margin-left: 240px; }
+
+.topbar {
+  height: 52px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; background: var(--bg-white);
+  position: sticky; top: 0; z-index: 50;
+}
+
+.breadcrumb {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; color: var(--text-secondary);
+}
+.breadcrumb .sep { color: var(--text-muted); font-size: 11px; }
+.breadcrumb .current { color: var(--text); font-weight: 600; }
+
+.topbar-actions { display: flex; gap: 6px; }
+.topbar-btn {
+  padding: 6px 12px; border-radius: 6px;
+  border: 1px solid var(--border); background: var(--bg-white);
+  color: var(--text-secondary); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; gap: 5px;
+}
+.topbar-btn:hover { background: var(--bg); border-color: #d1d5db; }
+.topbar-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; }
+
+.content { padding: 24px; max-width: 1140px; margin: 0 auto; }
+
+/* ── Page Header ── */
+.page-header { margin-bottom: 24px; }
+.page-header h2 {
+  font-size: 20px; font-weight: 700; letter-spacing: -0.02em;
+  display: flex; align-items: center; gap: 10px;
+}
+.page-header h2 .header-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+}
+.page-header h2 .header-icon svg { width: 20px; height: 20px; stroke-width: 1.8; }
+.page-header p { font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
+
+/* ── Cards ── */
+.card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+  transition: var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-sm); }
+
+/* ── Category Grid ── */
+.category-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+
+.category-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer; transition: var(--transition);
+  position: relative;
+}
+.category-card:hover {
+  border-color: var(--accent-border);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.category-card .card-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+}
+.category-card .card-icon svg { width: 20px; height: 20px; stroke-width: 1.8; }
+.category-card .card-icon.c-accent { background: var(--accent-bg); color: var(--accent); }
+.category-card .card-icon.c-green { background: var(--green-bg); color: var(--green); }
+.category-card .card-icon.c-orange { background: var(--orange-bg); color: var(--orange); }
+.category-card .card-icon.c-cyan { background: var(--cyan-bg); color: var(--cyan); }
+.category-card .card-icon.c-pink { background: var(--pink-bg); color: var(--pink); }
+.category-card .card-icon.c-red { background: var(--red-bg); color: var(--red); }
+
+.category-card h3 { font-size: 14px; font-weight: 650; margin-bottom: 4px; letter-spacing: -0.01em; }
+.category-card p { font-size: 12px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 12px; }
+
+.tag-row { display: flex; flex-wrap: wrap; gap: 4px; }
+.tag {
+  padding: 2px 7px; border-radius: 4px;
+  font-size: 10.5px; font-family: var(--mono);
+  background: var(--bg); color: var(--text-muted);
+  border: 1px solid var(--border-light); font-weight: 500;
+}
+
+/* ── Stats Row ── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  margin-top: 20px;
+}
+.stat-card {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px; text-align: center;
+}
+.stat-card .stat-num {
+  font-size: 26px; font-weight: 700; letter-spacing: -0.03em;
+}
+.stat-card .stat-num.c-accent { color: var(--accent); }
+.stat-card .stat-num.c-green { color: var(--green); }
+.stat-card .stat-num.c-orange { color: var(--orange); }
+.stat-card .stat-num.c-pink { color: var(--pink); }
+.stat-card .stat-label { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Tool Workspace ── */
+.workspace { display: flex; flex-direction: column; gap: 16px; }
+
+/* ── Pill Selector ── */
+.pill-bar {
+  display: flex; flex-wrap: wrap; gap: 4px;
+  padding: 3px; background: var(--bg);
+  border-radius: var(--radius); border: 1px solid var(--border);
+}
+.pill {
+  padding: 6px 13px; border-radius: 6px;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: var(--transition); color: var(--text-secondary);
+  border: none; background: transparent; font-family: var(--font);
+}
+.pill:hover { color: var(--text); background: var(--bg-white); }
+.pill.active {
+  background: var(--accent); color: #fff;
+  box-shadow: 0 1px 3px rgba(79,70,229,0.25);
+}
+
+/* ── Config Grid ── */
+.config-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.field label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted);
+}
+.field select, .field input[type="text"], .field input[type="number"] {
+  padding: 7px 10px; background: var(--bg-white);
+  border: 1px solid var(--border); border-radius: 6px;
+  color: var(--text); font-size: 13px; font-family: var(--font);
+  outline: none; transition: var(--transition);
+  appearance: none; -webkit-appearance: none;
+}
+.field select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' fill='none' stroke='%239ca3af' stroke-width='1.5' stroke-linecap='round'%3E%3Cpolyline points='2,3.5 5,6.5 8,3.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center; padding-right: 26px;
+}
+.field select option { background: var(--bg-white); }
+.field select:focus, .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+
+/* ── IO Panels ── */
+.io-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.io-box {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.io-box-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 8px 14px; border-bottom: 1px solid var(--border-light);
+  background: var(--bg);
+}
+.io-box-header .label {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted);
+  display: flex; align-items: center; gap: 6px;
+}
+.io-box-header .label .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+}
+.io-box-header .label .dot.input { background: var(--accent); }
+.io-box-header .label .dot.output { background: var(--green); }
+
+.io-box-header .btns { display: flex; gap: 2px; }
+.io-box-header .btns button {
+  padding: 3px 7px; border-radius: 4px; border: none;
+  background: transparent; color: var(--text-muted); font-size: 11px;
+  cursor: pointer; transition: var(--transition); font-family: var(--font);
+}
+.io-box-header .btns button:hover { background: var(--bg-white); color: var(--text-secondary); }
+
+.io-box textarea {
+  width: 100%; min-height: 180px; padding: 12px 14px;
+  background: transparent; border: none;
+  color: var(--text); font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.6; resize: vertical; outline: none;
+}
+.io-box textarea::placeholder { color: var(--text-muted); }
+
+.io-box .output-text {
+  min-height: 180px; padding: 12px 14px;
+  font-family: var(--mono); font-size: 12.5px;
+  line-height: 1.6; color: var(--green); word-break: break-all;
+}
+
+.io-box .io-footer {
+  display: flex; gap: 16px; padding: 6px 14px;
+  border-top: 1px solid var(--border-light);
+  font-size: 11px; color: var(--text-muted);
+}
+.io-box .io-footer span { font-family: var(--mono); color: var(--text-secondary); }
+
+.format-tabs {
+  display: flex; border-top: 1px solid var(--border-light);
+}
+.format-tab {
+  padding: 6px 14px; font-size: 11.5px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer;
+  border-bottom: 2px solid transparent; transition: var(--transition);
+}
+.format-tab:hover { color: var(--text-secondary); }
+.format-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── Buttons ── */
+.btn {
+  padding: 9px 20px; border-radius: 6px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: var(--transition); display: inline-flex;
+  align-items: center; gap: 6px; border: none; font-family: var(--font);
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #4338ca; }
+.btn-green { background: var(--green); color: #fff; }
+.btn-green:hover { background: #047857; }
+.btn-outline {
+  background: var(--bg-white); color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.btn-outline:hover { background: var(--bg); border-color: #d1d5db; }
+
+.btn-icon {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--transition); color: var(--text-muted);
+}
+.btn-icon:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent-border); }
+.btn-icon svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+.action-bar {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ── Keygen ── */
+.keygen-section {
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px; margin-bottom: 12px;
+}
+.keygen-section h3 {
+  font-size: 13.5px; font-weight: 650; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.keygen-section h3 .sec-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+}
+.keygen-section h3 .sec-icon svg { width: 15px; height: 15px; stroke-width: 1.8; }
+
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 12px; font-weight: 500;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer; transition: var(--transition);
+}
+.chip:hover { border-color: var(--accent-border); color: var(--accent); }
+.chip.active { background: var(--accent-bg); border-color: var(--accent-border); color: var(--accent); }
+
+.output-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 10px 14px;
+  font-family: var(--mono); font-size: 12px; line-height: 1.6;
+  min-height: 60px; position: relative; word-break: break-all;
+}
+.output-box .copy-float {
+  position: absolute; top: 6px; right: 6px;
+  padding: 3px 8px; border-radius: 4px;
+  border: 1px solid var(--border); background: var(--bg-white);
+  font-size: 11px; color: var(--text-muted); cursor: pointer;
+  font-family: var(--font);
+}
+.output-box .copy-float:hover { color: var(--text); }
+
+.output-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ── Hash Grid ── */
+.hash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.hash-item {
+  background: var(--bg-white); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 14px;
+}
+.hash-item .hash-label {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+.hash-item .hash-label span {
+  font-size: 11px; font-weight: 600; color: var(--text-muted);
+}
+.hash-item .hash-label .gm-tag {
+  font-size: 9px; background: var(--pink-bg); color: var(--pink);
+  padding: 1px 5px; border-radius: 3px; font-weight: 600;
+}
+.hash-item .hash-label button {
+  border: none; background: transparent; color: var(--text-muted);
+  cursor: pointer; font-size: 11px;
+}
+.hash-item .hash-value {
+  font-family: var(--mono); font-size: 11.5px;
+  word-break: break-all; line-height: 1.5;
+}
+.hash-item .hash-value.c-green { color: var(--green); }
+.hash-item .hash-value.c-orange { color: var(--orange); }
+.hash-item .hash-value.c-accent { color: var(--accent); }
+.hash-item .hash-value.c-cyan { color: var(--cyan); }
+.hash-item .hash-value.c-pink { color: var(--pink); }
+
+/* ── Quick Actions ── */
+.quick-actions { display: flex; gap: 6px; }
+.quick-btn {
+  padding: 5px 10px; border-radius: 5px;
+  font-size: 11.5px; font-weight: 500;
+  background: var(--bg); border: 1px solid var(--border);
+  color: var(--text-secondary); cursor: pointer;
+  transition: var(--transition); font-family: var(--font);
+}
+.quick-btn:hover { border-color: var(--accent-border); color: var(--accent); }
+
+/* ── Responsive ── */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; }
+  .io-grid { grid-template-columns: 1fr; }
+  .category-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.animate { animation: fadeUp 0.2s ease-out; }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ═══ Sidebar ═══ -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark">
+          <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </div>
+        <div>
+          <div class="logo-text">CryptoBox</div>
+          <div class="logo-version">v1.0 · Flat Edition</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-search">
+      <input type="text" placeholder="搜索算法..." id="searchInput" />
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-group">
+        <div class="nav-item active" data-page="home">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span>工作台</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">对称加密</div>
+        <div class="nav-item" data-page="aes">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <span>AES</span>
+          <span class="badge">4 modes</span>
+        </div>
+        <div class="nav-item" data-page="des">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+          <span>DES / 3DES</span>
+        </div>
+        <div class="nav-item" data-page="chacha20">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></span>
+          <span>ChaCha20</span>
+        </div>
+        <div class="nav-item" data-page="blowfish">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg></span>
+          <span>Blowfish</span>
+        </div>
+        <div class="nav-item" data-page="rc4">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg></span>
+          <span>RC4</span>
+        </div>
+        <div class="nav-item" data-page="sm4">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <span>SM4</span>
+          <span class="badge">国密</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">非对称加密</div>
+        <div class="nav-item" data-page="rsa">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>
+          <span>RSA</span>
+        </div>
+        <div class="nav-item" data-page="ecc">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="12" rx="10" ry="6"/><line x1="12" y1="6" x2="12" y2="18"/></svg></span>
+          <span>ECC / ECDSA</span>
+        </div>
+        <div class="nav-item" data-page="ed25519">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg></span>
+          <span>Ed25519</span>
+        </div>
+        <div class="nav-item" data-page="sm2">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+          <span>SM2</span>
+          <span class="badge">国密</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">哈希 & HMAC</div>
+        <div class="nav-item" data-page="hash">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>
+          <span>Hash 通用</span>
+          <span class="badge">12+</span>
+        </div>
+        <div class="nav-item" data-page="hmac">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+          <span>HMAC</span>
+        </div>
+        <div class="nav-item" data-page="password">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M2 18v3c0 .6.4 1 1 1h4v-3h3v-3h2l1.4-1.4a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5"/></svg></span>
+          <span>密码哈希</span>
+          <span class="badge">4</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">编码 & 序列化</div>
+        <div class="nav-item" data-page="base64">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg></span>
+          <span>Base64 / Base32</span>
+        </div>
+        <div class="nav-item" data-page="hex">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg></span>
+          <span>Hex / URL</span>
+        </div>
+        <div class="nav-item" data-page="jwt">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg></span>
+          <span>JWT</span>
+        </div>
+      </div>
+
+      <div class="nav-group">
+        <div class="nav-group-label">工具</div>
+        <div class="nav-item" data-page="keygen">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+          <span>密钥生成器</span>
+        </div>
+        <div class="nav-item" data-page="cert">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+          <span>证书工具</span>
+        </div>
+        <div class="nav-item" data-page="compare">
+          <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          <span>对比工具</span>
+        </div>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ═══ Main ═══ -->
+  <main class="main">
+    <header class="topbar">
+      <div class="breadcrumb">
+        <span>CryptoBox</span>
+        <span class="sep">/</span>
+        <span class="current" id="breadcrumbCurrent">工作台</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="topbar-btn">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/></svg>
+          浅色
+        </button>
+        <button class="topbar-btn">
+          <svg viewBox="0 0 24 24"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          历史
+        </button>
+      </div>
+    </header>
+
+    <!-- ════ Home ════ -->
+    <div class="content animate" id="page-home">
+      <div class="page-header">
+        <h2>
+          <span class="header-icon" style="background: var(--accent-bg); color: var(--accent);">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          CryptoBox 工作台
+        </h2>
+        <p>选择一个加密类别开始工作，支持 30+ 种主流和非主流加解密算法</p>
+      </div>
+
+      <div class="category-grid">
+        <div class="category-card" data-goto="aes">
+          <div class="card-icon c-accent">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h3>对称加密</h3>
+          <p>AES、DES、3DES、ChaCha20、Blowfish、RC4、SM4</p>
+          <div class="tag-row">
+            <span class="tag">AES-256-GCM</span><span class="tag">AES-CBC</span><span class="tag">ChaCha20</span><span class="tag">SM4</span>
+          </div>
+        </div>
+        <div class="category-card" data-goto="rsa">
+          <div class="card-icon c-green">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          </div>
+          <h3>非对称加密</h3>
+          <p>RSA 加解密/签名、ECC/ECDSA、Ed25519、SM2 国密</p>
+          <div class="tag-row">
+            <span class="tag">RSA-2048</span><span class="tag">P-256</span><span class="tag">Ed25519</span><span class="tag">SM2</span>
+          </div>
+        </div>
+        <div class="category-card" data-goto="hash">
+          <div class="card-icon c-orange">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+          </div>
+          <h3>哈希 & HMAC</h3>
+          <p>MD5、SHA 全系列、SHA-3、SM3、BLAKE2/3、RIPEMD-160</p>
+          <div class="tag-row">
+            <span class="tag">SHA-256</span><span class="tag">SHA-3</span><span class="tag">SM3</span><span class="tag">BLAKE3</span>
+          </div>
+        </div>
+        <div class="category-card" data-goto="base64">
+          <div class="card-icon c-cyan">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18l6-6-6-6"/><path d="M8 6l-6 6 6 6"/></svg>
+          </div>
+          <h3>编码 & 序列化</h3>
+          <p>Base64、Base32、Hex、URL Encode、Unicode 编解码</p>
+          <div class="tag-row">
+            <span class="tag">Base64</span><span class="tag">Hex</span><span class="tag">URL</span><span class="tag">Unicode</span>
+          </div>
+        </div>
+        <div class="category-card" data-goto="keygen">
+          <div class="card-icon c-pink">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
+          </div>
+          <h3>密钥生成器</h3>
+          <p>一键生成 RSA/ECC/AES 密钥、随机字节、安全密码</p>
+          <div class="tag-row">
+            <span class="tag">RSA-4096</span><span class="tag">AES-Key</span><span class="tag">Random</span><span class="tag">Password</span>
+          </div>
+        </div>
+        <div class="category-card" data-goto="jwt">
+          <div class="card-icon c-red">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          </div>
+          <h3>JWT & 证书</h3>
+          <p>JWT 编解码与验签、X.509 证书解析、PEM/DER 转换</p>
+          <div class="tag-row">
+            <span class="tag">JWT</span><span class="tag">X.509</span><span class="tag">PEM</span><span class="tag">DER</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-num c-accent">30+</div>
+          <div class="stat-label">加密算法</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num c-green">12+</div>
+          <div class="stat-label">哈希算法</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num c-orange">8+</div>
+          <div class="stat-label">密钥类型</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num c-pink">100%</div>
+          <div class="stat-label">本地运算</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ AES Page ════ -->
+    <div class="content animate" id="page-aes" style="display:none;">
+      <div class="page-header">
+        <h2>
+          <span class="header-icon" style="background: var(--accent-bg); color: var(--accent);">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </span>
+          AES 加解密
+        </h2>
+        <p>Advanced Encryption Standard — 支持 ECB / CBC / CTR / GCM 四种模式</p>
+      </div>
+
+      <div class="workspace">
+        <div class="pill-bar">
+          <button class="pill active">AES-128-CBC</button>
+          <button class="pill">AES-256-CBC</button>
+          <button class="pill">AES-128-ECB</button>
+          <button class="pill">AES-256-ECB</button>
+          <button class="pill">AES-128-CTR</button>
+          <button class="pill">AES-256-CTR</button>
+          <button class="pill">AES-128-GCM</button>
+          <button class="pill">AES-256-GCM</button>
+        </div>
+
+        <div class="config-grid">
+          <div class="field"><label>密钥长度</label><select><option>128 bit</option><option selected>256 bit</option></select></div>
+          <div class="field"><label>模式</label><select><option selected>CBC</option><option>ECB</option><option>CTR</option><option>GCM</option></select></div>
+          <div class="field"><label>填充</label><select><option selected>PKCS7</option><option>ZeroPadding</option><option>NoPadding</option></select></div>
+          <div class="field"><label>输出格式</label><select><option selected>Base64</option><option>Hex</option></select></div>
+          <div class="field"><label>Key</label><input type="text" placeholder="输入密钥或点击生成" style="font-family:var(--mono);" /></div>
+          <div class="field"><label>IV</label><input type="text" placeholder="16 bytes" style="font-family:var(--mono);" /></div>
+        </div>
+
+        <div class="quick-actions">
+          <button class="quick-btn">↻ 随机 Key</button>
+          <button class="quick-btn">↻ 随机 IV</button>
+        </div>
+
+        <div class="io-grid">
+          <div class="io-box">
+            <div class="io-box-header">
+              <div class="label"><span class="dot input"></span> 输入 (明文)</div>
+              <div class="btns"><button>粘贴</button><button>文件</button><button>清空</button></div>
+            </div>
+            <textarea placeholder="在此输入要加密的内容..."></textarea>
+            <div class="format-tabs">
+              <div class="format-tab active">UTF-8</div>
+              <div class="format-tab">Hex</div>
+              <div class="format-tab">Base64</div>
+            </div>
+          </div>
+          <div class="io-box">
+            <div class="io-box-header">
+              <div class="label"><span class="dot output"></span> 输出 (密文)</div>
+              <div class="btns"><button>复制</button><button>保存</button></div>
+            </div>
+            <div class="output-text">U2FsdGVkX1+vupppZksvRf5pq5g5XjFRlipRkwB0K1Y=</div>
+            <div class="io-footer">
+              长度: <span>44</span> &nbsp;·&nbsp; 编码: <span>Base64</span> &nbsp;·&nbsp; 耗时: <span>0.12ms</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn btn-primary">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            加密 Encrypt
+          </button>
+          <button class="btn-icon">
+            <svg viewBox="0 0 24 24"><path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/></svg>
+          </button>
+          <button class="btn btn-green">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5"/></svg>
+            解密 Decrypt
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ Hash Page ════ -->
+    <div class="content animate" id="page-hash" style="display:none;">
+      <div class="page-header">
+        <h2>
+          <span class="header-icon" style="background: var(--orange-bg); color: var(--orange);">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+          </span>
+          哈希计算
+        </h2>
+        <p>一次输入，同时计算所有哈希值 — 支持 12+ 种哈希算法</p>
+      </div>
+
+      <div class="workspace">
+        <div class="io-box">
+          <div class="io-box-header">
+            <div class="label"><span class="dot" style="background:var(--orange);"></span> 输入</div>
+            <div class="btns"><button>粘贴</button><button>文件哈希</button><button>清空</button></div>
+          </div>
+          <textarea style="min-height:100px;">Hello, CryptoBox!</textarea>
+          <div class="format-tabs">
+            <div class="format-tab active">UTF-8</div>
+            <div class="format-tab">Hex</div>
+            <div class="format-tab">Base64</div>
+            <div class="format-tab">文件</div>
+          </div>
+        </div>
+
+        <div class="hash-grid">
+          <div class="hash-item">
+            <div class="hash-label"><span>MD5</span><button>复制</button></div>
+            <div class="hash-value c-orange">e4d7f1b4ed2e42d15898f4b27b019da4</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>SHA-1</span><button>复制</button></div>
+            <div class="hash-value c-orange">2ef7bde608ce5404e97d5f042f95f89f1c232871</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>SHA-256</span><button>复制</button></div>
+            <div class="hash-value c-green">c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>SHA-512</span><button>复制</button></div>
+            <div class="hash-value c-green">861844d6704e8573fec34d967e20bcfe...f4e2e4af1e8</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>SHA-3 (256)</span><button>复制</button></div>
+            <div class="hash-value c-cyan">a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>SM3 <span class="gm-tag">国密</span></span><button>复制</button></div>
+            <div class="hash-value c-pink">66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>BLAKE2b</span><button>复制</button></div>
+            <div class="hash-value c-accent">324dcf027dd4a30a932c441f365a25e86b173defa4b8e58948253471b81b72cf</div>
+          </div>
+          <div class="hash-item">
+            <div class="hash-label"><span>BLAKE3</span><button>复制</button></div>
+            <div class="hash-value c-accent">4878ca0425c739fa427f7eda20fe845f6b2e46ba5fe2a14df5b1e32f50603215</div>
+          </div>
+        </div>
+
+        <div class="action-bar">
+          <button class="btn" style="background:var(--orange);color:#fff;">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+            计算哈希
+          </button>
+          <button class="btn btn-outline">全部复制</button>
+          <button class="btn btn-outline">对比验证</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ Keygen Page ════ -->
+    <div class="content animate" id="page-keygen" style="display:none;">
+      <div class="page-header">
+        <h2>
+          <span class="header-icon" style="background: var(--pink-bg); color: var(--pink);">
+            <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4"/></svg>
+          </span>
+          密钥生成器
+        </h2>
+        <p>一键生成各类加密密钥，支持多种格式导出</p>
+      </div>
+
+      <div class="workspace">
+        <div class="keygen-section">
+          <h3>
+            <span class="sec-icon" style="background:var(--accent-bg);color:var(--accent);">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            对称密钥
+          </h3>
+          <div class="chip-row">
+            <span class="chip active">AES-128</span>
+            <span class="chip">AES-192</span>
+            <span class="chip">AES-256</span>
+            <span class="chip">ChaCha20</span>
+            <span class="chip">SM4</span>
+          </div>
+          <div class="config-grid" style="margin-bottom:12px;">
+            <div class="field"><label>格式</label><select><option>Hex</option><option>Base64</option></select></div>
+            <div class="field"><label>数量</label><input type="number" value="1" min="1" max="10" /></div>
+          </div>
+          <button class="btn btn-primary" style="font-size:12px;padding:7px 14px;margin-bottom:10px;">生成密钥</button>
+          <div class="output-box" style="color:var(--accent);">
+            <button class="copy-float">复制</button>
+            a1b2c3d4e5f6789012345678abcdef01
+          </div>
+        </div>
+
+        <div class="keygen-section">
+          <h3>
+            <span class="sec-icon" style="background:var(--green-bg);color:var(--green);">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+            </span>
+            RSA 密钥对
+          </h3>
+          <div class="chip-row">
+            <span class="chip">1024</span><span class="chip active">2048</span><span class="chip">3072</span><span class="chip">4096</span>
+          </div>
+          <div class="config-grid" style="margin-bottom:12px;max-width:200px;">
+            <div class="field"><label>格式</label><select><option>PEM (PKCS#8)</option><option>PEM (PKCS#1)</option><option>DER</option><option>JWK</option></select></div>
+          </div>
+          <button class="btn btn-green" style="font-size:12px;padding:7px 14px;margin-bottom:10px;">生成密钥对</button>
+          <div class="output-pair">
+            <div class="output-box" style="color:var(--green);font-size:11px;min-height:100px;">
+              <button class="copy-float">复制</button>
+              -----BEGIN PUBLIC KEY-----<br/>MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8A...<br/>-----END PUBLIC KEY-----
+            </div>
+            <div class="output-box" style="color:var(--red);font-size:11px;min-height:100px;">
+              <button class="copy-float">复制</button>
+              -----BEGIN PRIVATE KEY-----<br/>MIIEvQIBADANBgkqhkiG9w0BAQEFAAOC...<br/>-----END PRIVATE KEY-----
+            </div>
+          </div>
+        </div>
+
+        <div class="keygen-section">
+          <h3>
+            <span class="sec-icon" style="background:var(--pink-bg);color:var(--pink);">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><ellipse cx="12" cy="12" rx="10" ry="6"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+            </span>
+            ECC 密钥对
+          </h3>
+          <div class="chip-row">
+            <span class="chip active">P-256</span><span class="chip">P-384</span><span class="chip">P-521</span>
+            <span class="chip">secp256k1</span><span class="chip">Ed25519</span><span class="chip">X25519</span>
+          </div>
+          <button class="btn" style="background:var(--pink);color:#fff;font-size:12px;padding:7px 14px;margin:10px 0;">生成密钥对</button>
+          <div class="output-box" style="color:var(--pink);">
+            <button class="copy-float">复制</button>
+            Private: 0x3a1b2c3d4e5f...（点击生成）
+          </div>
+        </div>
+
+        <div class="keygen-section">
+          <h3>
+            <span class="sec-icon" style="background:var(--cyan-bg);color:var(--cyan);">
+              <svg viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8" stroke-linecap="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            </span>
+            随机数 & 密码
+          </h3>
+          <div class="config-grid" style="margin-bottom:12px;">
+            <div class="field"><label>类型</label><select><option>随机字节</option><option>安全密码</option><option>UUID v4</option></select></div>
+            <div class="field"><label>长度</label><input type="number" value="32" min="1" max="256" /></div>
+            <div class="field"><label>格式</label><select><option>Hex</option><option>Base64</option><option>Base58</option></select></div>
+          </div>
+          <button class="btn" style="background:var(--cyan);color:#fff;font-size:12px;padding:7px 14px;margin-bottom:10px;">生成</button>
+          <div class="output-box" style="color:var(--cyan);">
+            <button class="copy-float">复制</button>
+            f7a8b3c2d1e0f9a8b7c6d5e4f3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+document.querySelectorAll('.nav-item[data-page]').forEach(item => {
+  item.addEventListener('click', () => {
+    const page = item.dataset.page;
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    item.classList.add('active');
+    document.getElementById('breadcrumbCurrent').textContent = item.querySelector('span:nth-child(2)').textContent;
+    document.querySelectorAll('[id^="page-"]').forEach(p => p.style.display = 'none');
+    const t = document.getElementById('page-' + page);
+    if (t) { t.style.display = ''; t.classList.remove('animate'); void t.offsetWidth; t.classList.add('animate'); }
+    else { document.getElementById('page-home').style.display = ''; }
+  });
+});
+document.querySelectorAll('.category-card[data-goto]').forEach(c => {
+  c.addEventListener('click', () => { const n = document.querySelector(`.nav-item[data-page="${c.dataset.goto}"]`); if(n) n.click(); });
+});
+document.querySelectorAll('.pill-bar').forEach(b => {
+  b.querySelectorAll('.pill').forEach(p => { p.addEventListener('click', () => { b.querySelectorAll('.pill').forEach(x => x.classList.remove('active')); p.classList.add('active'); }); });
+});
+document.querySelectorAll('.keygen-section').forEach(s => {
+  s.querySelectorAll('.chip').forEach(c => { c.addEventListener('click', () => { s.querySelectorAll('.chip').forEach(x => x.classList.remove('active')); c.classList.add('active'); }); });
+});
+document.querySelectorAll('.format-tabs').forEach(t => {
+  t.querySelectorAll('.format-tab').forEach(f => { f.addEventListener('click', () => { t.querySelectorAll('.format-tab').forEach(x => x.classList.remove('active')); f.classList.add('active'); }); });
+});
+document.getElementById('searchInput').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  document.querySelectorAll('.nav-item[data-page]').forEach(i => { i.style.display = q && !i.textContent.toLowerCase().includes(q) ? 'none' : ''; });
+});
+</script>
+</body>
+</html>
