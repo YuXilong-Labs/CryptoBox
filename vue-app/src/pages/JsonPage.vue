@@ -1,26 +1,40 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import JsonTree from '../components/JsonTree.vue'
 
 const modes = ['格式化', '压缩', '校验', '转义', '去转义']
 const selected = ref('格式化')
 const input = ref('')
 const output = ref('')
 const error = ref('')
+const treeData = ref(null)
 
 function run() {
   error.value = ''
+  treeData.value = null
   try {
     switch (selected.value) {
-      case '格式化': output.value = JSON.stringify(JSON.parse(input.value), null, 2); break
+      case '格式化': {
+        const parsed = JSON.parse(input.value)
+        output.value = JSON.stringify(parsed, null, 2)
+        treeData.value = parsed
+        break
+      }
       case '压缩': output.value = JSON.stringify(JSON.parse(input.value)); break
       case '校验': { JSON.parse(input.value); output.value = '✅ 有效的 JSON'; break }
-      case '转义': output.value = JSON.stringify(input.value); break
+      case '转义': {
+        const compressed = JSON.stringify(JSON.parse(input.value))
+        output.value = JSON.stringify(compressed)
+        break
+      }
       case '去转义': output.value = JSON.parse(input.value); break
     }
   } catch (e) { error.value = e.message; output.value = '' }
 }
+
+const showTree = computed(() => selected.value === '格式化' && treeData.value !== null)
 </script>
 
 <template>
@@ -30,7 +44,7 @@ function run() {
         <span class="w-8 h-8 flex items-center justify-center bg-[var(--accent-dim)] rounded border border-[var(--accent)]/20 text-[var(--accent)]">{ }</span>
         JSON 工具
       </h2>
-      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">格式化、压缩、校验、转义</p>
+      <p class="text-[var(--text-3)] text-[12px] mt-1 ml-[42px]">格式化（树形折叠）、压缩、校验、转义（先压缩再转义）</p>
     </div>
 
     <PillGroup :items="modes" v-model="selected" />
@@ -38,11 +52,19 @@ function run() {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
       <div class="flex flex-col gap-1">
         <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">输入</label>
-        <textarea v-model="input" placeholder='{"key": "value"}' class="!min-h-[200px] !text-[12px]" />
+        <textarea v-model="input" placeholder='{"key": "value"}' class="!min-h-[480px] !text-[12px]" />
       </div>
       <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">输出 <CopyBtn :value="output" /></label>
-        <textarea :value="output" readonly class="!min-h-[200px] !text-[12px] !text-[var(--accent)]" placeholder="结果..." />
+        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">
+          输出
+          <CopyBtn :value="output" />
+        </label>
+        <!-- Tree view for 格式化 -->
+        <div v-if="showTree" class="border border-[var(--border)] rounded bg-[var(--bg)] p-3 min-h-[480px] max-h-[700px] overflow-auto mono text-[12px] leading-[1.7]">
+          <JsonTree :data="treeData" :root="true" />
+        </div>
+        <!-- Text output for others -->
+        <textarea v-else :value="output" readonly class="!min-h-[480px] !text-[12px] !text-[var(--accent)]" placeholder="结果..." />
       </div>
     </div>
 
