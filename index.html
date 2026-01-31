@@ -174,11 +174,40 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 /* Workspace */
 .ws{display:flex;flex-direction:column;gap:16px}
 
-/* Pills */
-.pills{display:flex;flex-wrap:wrap;gap:4px;padding:3px;background:var(--bg-input);border-radius:var(--r);border:1px solid var(--border)}
-.pill{padding:6px 13px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;transition:var(--t);color:var(--text2);border:none;background:transparent;font-family:var(--sans)}
-.pill:hover{color:var(--text);background:rgba(255,255,255,0.04)}
-.pill.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(99,102,241,0.3)}
+/* Pills (简化版，使用背景过渡) */
+.pills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:4px;
+  padding:3px;
+  background:var(--bg-input);
+  border-radius:var(--r);
+  border:1px solid var(--border);
+}
+.pill{
+  padding:6px 13px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:500;
+  cursor:pointer;
+  transition:background 0.25s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+  color:var(--text2);
+  border:none;
+  background:transparent;
+  font-family:var(--sans);
+  position:relative;
+}
+.pill:hover{
+  color:var(--text);
+  background:rgba(255,255,255,0.04);
+  transform:translateY(-1px);
+}
+.pill.active{
+  background:var(--accent);
+  color:#fff;
+  box-shadow:0 2px 8px rgba(99,102,241,0.3);
+  transform:translateY(-1px) scale(1.02);
+}
 
 /* Config */
 .cfg{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
@@ -721,6 +750,168 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
 @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 .anim{animation:fadeUp 0.25s ease-out}
 
+/* ═══ 全局过渡动效 ═══ */
+/* 导航项过渡 */
+.nav-i {
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.nav-i::before {
+  transition: opacity 0.2s ease, height 0.2s ease, background 0.2s ease;
+}
+.nav-i:hover {
+  transform: translateX(2px);
+}
+
+/* Tab 按钮过渡 */
+.jtab, [class*="tab"], .pill, .ftab, .chip {
+  transition: background 0.25s ease, color 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+}
+.pill:hover, .chip:hover, .ftab:hover {
+  transform: translateY(-1px);
+}
+
+/* 页面切换过渡 */
+[id^="page-"] {
+  transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+}
+[id^="page-"].page-entering {
+  opacity: 0;
+  transform: translateY(8px);
+}
+[id^="page-"].page-entering-active {
+  opacity: 1;
+  transform: translateY(0);
+}
+[id^="page-"].page-exiting {
+  opacity: 1;
+  transform: translateY(0);
+}
+[id^="page-"].page-exiting-active {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* 卡片悬停动效 */
+.cat-card, .home-card, [class*="card"] {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+.cat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+}
+.cat-card:hover .cat-icon {
+  transform: scale(1.05);
+  transition: transform 0.2s ease;
+}
+
+/* 输出区域闪烁高亮 */
+@keyframes output-flash {
+  0% { background-color: rgba(99,102,241,0.12); border-color: rgba(99,102,241,0.3); }
+  50% { background-color: rgba(99,102,241,0.08); border-color: rgba(99,102,241,0.2); }
+  100% { background-color: transparent; border-color: var(--border); }
+}
+.output-flash {
+  animation: output-flash 0.8s ease-out;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+}
+
+/* 输入输出框过渡 */
+select, input, textarea {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+select:focus, input:focus, textarea:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.1);
+}
+
+/* 输入框焦点状态容器 */
+.input-focused {
+  transform: scale(1.01);
+  transition: transform 0.2s ease;
+}
+
+/* 输入框字符统计动态效果 */
+.char-count {
+  transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+/* 输入框占位提示增强 */
+.io textarea:placeholder-shown + .char-count {
+  opacity: 0.6;
+}
+
+/* 历史面板展开动效 */
+.history-item-details {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.3s ease, padding 0.3s ease;
+}
+.history-item.expanded .history-item-details {
+  max-height: 400px;
+  opacity: 1;
+  padding-top: 12px;
+}
+
+/* 历史记录项悬停 */
+.history-item {
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.history-item:hover {
+  transform: translateY(-1px);
+}
+
+/* 按钮悬停微动效 */
+.btn, .btn-p, .btn-g, .btn-o, .btn-sw, .tb-btn, .qa button, .history-btn, .detail-btn {
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+}
+.btn:hover, .btn-p:hover, .btn-g:hover {
+  transform: translateY(-1px);
+}
+.btn-sw:hover {
+  transform: scale(1.05);
+}
+
+/* IO面板内容变化动效 */
+.io .out {
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+/* 搜索高亮动效 */
+.search-highlight {
+  animation: highlight-pulse 1s ease-out;
+}
+@keyframes highlight-pulse {
+  0% { background-color: transparent; }
+  50% { background-color: var(--yellow-g); }
+  100% { background-color: var(--yellow-g); }
+}
+
+/* Toast 进入动效增强 */
+.toast {
+  transform: translateX(100%) scale(0.8);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast.show {
+  transform: translateX(0) scale(1);
+}
+
+/* JSON树形展开/折叠动效 */
+.json-tree-node {
+  transition: max-height 0.25s ease, opacity 0.25s ease;
+}
+
+/* 密钥生成框闪烁 */
+@keyframes key-generated {
+  0% { background-color: var(--bg-input); }
+  50% { background-color: rgba(34,197,94,0.1); border-color: var(--green); }
+  100% { background-color: var(--bg-input); }
+}
+.key-generated {
+  animation: key-generated 0.6s ease-out;
+}
+
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.08);border-radius:3px}
@@ -798,7 +989,7 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
     <div class="tb-r">
       <button class="tb-btn" id="history-toggle"><svg viewBox="0 0 24 24"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg> 历史 <span id="history-badge" class="badge-count" style="display:none">0</span></button>
       <button class="tb-btn" id="theme-toggle"><svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg> <span id="theme-text">暗色</span></button>
-      <button class="tb-btn" onclick="runAllTests()"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 测试</button>
+      <button class="tb-btn" id="debug-test-btn" onclick="runAllTests()" style="display:none"><svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> 测试</button>
     </div>
   </header>
 
@@ -1623,19 +1814,19 @@ body::before{content:'';position:fixed;top:-50%;left:-50%;width:200%;height:200%
     <div class="ws">
       <div class="io" id="hash-drop-zone">
         <div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span> 输入</div><div class="acts"><button id="hash-paste">粘贴</button><button id="hash-file">文件哈希</button><button id="hash-clear">清空</button></div></div>
-        <textarea id="hash-input" style="min-height:100px" placeholder="输入文本或拖拽文件到此处...">Hello, CryptoBox!</textarea>
-        <div class="char-count" id="hash-char-count">16 字符</div>
+        <textarea id="hash-input" style="min-height:100px" placeholder="输入文本或拖拽文件到此处..."></textarea>
+        <div class="char-count" id="hash-char-count">0 字符</div>
         <div class="ftabs"><div class="ftab active">UTF-8</div><div class="ftab">Hex</div><div class="ftab">Base64</div><div class="ftab">文件</div></div>
       </div>
       <div class="hg" id="hash-results">
-        <div class="hi2"><div class="hl"><span>MD5</span><button data-hash="md5">复制</button></div><div class="hv" id="hash-md5" style="color:var(--orange)">e4d7f1b4ed2e42d15898f4b27b019da4</div></div>
-        <div class="hi2"><div class="hl"><span>SHA-1</span><button data-hash="sha1">复制</button></div><div class="hv" id="hash-sha1" style="color:var(--orange)">2ef7bde608ce5404e97d5f042f95f89f1c232871</div></div>
-        <div class="hi2"><div class="hl"><span>SHA-256</span><button data-hash="sha256">复制</button></div><div class="hv" id="hash-sha256" style="color:var(--green)">c0535e4be2b79ffd93291305436bf889314e4a3faec05ecffcbb7df31ad9e51a</div></div>
-        <div class="hi2"><div class="hl"><span>SHA-512</span><button data-hash="sha512">复制</button></div><div class="hv" id="hash-sha512" style="color:var(--green)">861844d6704e8573fec34d967e20bcfe...</div></div>
-        <div class="hi2"><div class="hl"><span>SHA-3 (256)</span><button data-hash="sha3">复制</button></div><div class="hv" id="hash-sha3" style="color:var(--cyan)">a7ffc6f8bf1ed76651c14756a061d662f580ff4de43b49fa82d80a4b80f8434a</div></div>
-        <div class="hi2"><div class="hl"><span>SM3 <span class="gm">国密</span></span><button data-hash="sm3">复制</button></div><div class="hv" id="hash-sm3" style="color:var(--pink)">66c7f0f462eeedd9d1f2d46bdc10e4e24167c4875cf2f7a2297da02b8f4ba8e0</div></div>
-        <div class="hi2"><div class="hl"><span>BLAKE2b</span><button data-hash="blake2b">复制</button></div><div class="hv" id="hash-blake2b" style="color:var(--accent-l)">324dcf027dd4a30a932c441f365a25e86b173defa4b8e58948253471b81b72cf</div></div>
-        <div class="hi2"><div class="hl"><span>BLAKE3</span><button data-hash="blake3">复制</button></div><div class="hv" id="hash-blake3" style="color:var(--accent-l)">4878ca0425c739fa427f7eda20fe845f6b2e46ba5fe2a14df5b1e32f50603215</div></div>
+        <div class="hi2"><div class="hl"><span>MD5</span><button data-hash="md5">复制</button></div><div class="hv" id="hash-md5" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>SHA-1</span><button data-hash="sha1">复制</button></div><div class="hv" id="hash-sha1" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>SHA-256</span><button data-hash="sha256">复制</button></div><div class="hv" id="hash-sha256" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>SHA-512</span><button data-hash="sha512">复制</button></div><div class="hv" id="hash-sha512" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>SHA-3 (256)</span><button data-hash="sha3">复制</button></div><div class="hv" id="hash-sha3" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>SM3 <span class="gm">国密</span></span><button data-hash="sm3">复制</button></div><div class="hv" id="hash-sm3" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>BLAKE2b</span><button data-hash="blake2b">复制</button></div><div class="hv" id="hash-blake2b" style="color:var(--text3)">点击计算哈希显示结果</div></div>
+        <div class="hi2"><div class="hl"><span>BLAKE3</span><button data-hash="blake3">复制</button></div><div class="hv" id="hash-blake3" style="color:var(--text3)">点击计算哈希显示结果</div></div>
       </div>
       <div class="ab">
         <button class="btn" id="hash-compute" style="background:linear-gradient(135deg,var(--orange),#ea580c);color:#fff;box-shadow:0 2px 12px rgba(245,158,11,0.3)"><svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg> 计算哈希</button>
@@ -2643,13 +2834,80 @@ function setButtonLoading(button, loading = true) {
   }
 }
 
-// 复制到剪贴板
+// 输出区域闪烁高亮效果
+function flashOutputArea(elementId) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.classList.remove('output-flash');
+    void element.offsetWidth; // 强制重排
+    element.classList.add('output-flash');
+    setTimeout(() => {
+      element.classList.remove('output-flash');
+    }, 800);
+  }
+}
+
+// 增强的输出设置函数（带动画）
+function setOutputWithAnimation(elementId, text, success = true) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    // 淡出当前内容
+    element.style.opacity = '0.6';
+    element.style.transform = 'scale(0.98)';
+    
+    setTimeout(() => {
+      // 更新内容
+      element.textContent = text;
+      element.style.color = success ? 'var(--green)' : 'var(--red)';
+      
+      // 淡入新内容
+      element.style.opacity = '1';
+      element.style.transform = 'scale(1)';
+      
+      // 添加flash效果
+      flashOutputArea(elementId);
+    }, 150);
+  }
+}
+
+// 为按钮添加加载状态的辅助函数
+function executeWithLoading(button, asyncOperation) {
+  setButtonLoading(button, true);
+  const startTime = Date.now();
+  
+  return asyncOperation()
+    .then(result => {
+      const duration = Date.now() - startTime;
+      setTimeout(() => {
+        setButtonLoading(button, false);
+      }, Math.max(200, 300 - duration)); // 确保至少显示200ms的加载状态
+      return result;
+    })
+    .catch(error => {
+      const duration = Date.now() - startTime;
+      setTimeout(() => {
+        setButtonLoading(button, false);
+      }, Math.max(200, 300 - duration));
+      throw error;
+    });
+}
+
+// 复制到剪贴板（增强动效）
 async function copyToClipboard(text, button) {
   try {
     await navigator.clipboard.writeText(text);
     const originalText = button.textContent;
+    const originalTransform = button.style.transform;
+    
+    // 按钮点击动效
+    button.style.transform = 'scale(0.95)';
     button.textContent = '已复制 ✓';
     button.style.color = 'var(--green)';
+    
+    setTimeout(() => {
+      button.style.transform = originalTransform || '';
+    }, 150);
+    
     setTimeout(() => {
       button.textContent = originalText;
       button.style.color = '';
@@ -2663,8 +2921,13 @@ async function copyToClipboard(text, button) {
     textarea.select();
     document.execCommand('copy');
     document.body.removeChild(textarea);
+    
+    button.style.transform = 'scale(0.95)';
     button.textContent = '已复制 ✓';
-    setTimeout(() => button.textContent = '复制', 1000);
+    setTimeout(() => {
+      button.textContent = '复制';
+      button.style.transform = '';
+    }, 1000);
     showToast('已复制到剪贴板', 'success', 1500);
   }
 }
@@ -2690,7 +2953,83 @@ function initTheme() {
 function initApp() {
   initTheme();
   HistoryManager.init();
+  initDebugMode();
+  initInteractionEnhancements();
   console.log('🚀 CryptoBox 应用已完全初始化');
+}
+
+// 交互增强初始化
+function initInteractionEnhancements() {
+  // 主题切换按钮事件
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+  
+  // 为所有输出区域添加动画支持
+  const outputElements = document.querySelectorAll('.out, [id$="-output"], [id*="output"]');
+  outputElements.forEach(el => {
+    el.style.transition = 'opacity 0.2s ease, transform 0.2s ease, background-color 0.3s ease';
+  });
+  
+  // 为所有按钮添加点击反馈
+  const buttons = document.querySelectorAll('.btn, .btn-p, .btn-g, .btn-o, .qa button, .tb-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('click', function() {
+      this.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        this.style.transform = '';
+      }, 100);
+    });
+  });
+  
+  // 为输入框添加焦点动效
+  const inputs = document.querySelectorAll('input, textarea, select');
+  inputs.forEach(input => {
+    input.addEventListener('focus', function() {
+      this.style.transform = 'scale(1.02)';
+      this.parentElement?.classList.add('input-focused');
+    });
+    
+    input.addEventListener('blur', function() {
+      this.style.transform = '';
+      this.parentElement?.classList.remove('input-focused');
+    });
+    
+    // 为select变化添加内容区域过渡效果
+    if (input.tagName === 'SELECT') {
+      input.addEventListener('change', function() {
+        // 查找可能受影响的相关区域
+        const relatedAreas = this.closest('.ws')?.querySelectorAll('.cfg, .io, .pills');
+        relatedAreas?.forEach(area => {
+          area.style.opacity = '0.7';
+          area.style.transform = 'translateY(2px)';
+          
+          setTimeout(() => {
+            area.style.opacity = '1';
+            area.style.transform = 'translateY(0)';
+          }, 100);
+        });
+      });
+    }
+  });
+  
+  console.log('🎨 交互增强已完成');
+}
+
+// 调试模式检测
+function initDebugMode() {
+  const isDebugMode = window.location.search.includes('debug=1') || 
+                     window.location.hash.includes('debug') ||
+                     window.location.protocol === 'file:' ||
+                     window.location.hostname === 'localhost' ||
+                     window.location.hostname === '127.0.0.1';
+  
+  const testButton = document.getElementById('debug-test-btn');
+  if (testButton && isDebugMode) {
+    testButton.style.display = '';
+    console.log('🐛 调试模式已启用 - 测试按钮可用');
+  }
 }
 
 // 统计数据计算
@@ -2712,25 +3051,65 @@ function highlightSearchText(element, query) {
   return element.innerHTML.replace(regex, '<span class="search-highlight">$1</span>');
 }
 
-// ═══ 页面导航系统 ═══
+// ═══ 页面导航系统（带动画过渡）═══
+function switchPageWithAnimation(pageId) {
+  const currentPage = document.querySelector('[id^="page-"]:not([style*="display: none"])');
+  const newPage = document.getElementById('page-' + pageId);
+  
+  if (!newPage || currentPage === newPage) return;
+  
+  // 如果有当前页面，先淡出
+  if (currentPage) {
+    currentPage.classList.add('page-exiting');
+    currentPage.classList.add('page-exiting-active');
+    
+    setTimeout(() => {
+      currentPage.style.display = 'none';
+      currentPage.classList.remove('page-exiting', 'page-exiting-active');
+      
+      // 显示新页面并淡入
+      showNewPage();
+    }, 250); // 与CSS transition时间匹配
+  } else {
+    showNewPage();
+  }
+  
+  function showNewPage() {
+    newPage.style.display = '';
+    newPage.classList.add('page-entering');
+    
+    // 强制重排，然后添加进入动画
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        newPage.classList.remove('page-entering');
+        newPage.classList.add('page-entering-active');
+        
+        setTimeout(() => {
+          newPage.classList.remove('page-entering-active');
+          newPage.classList.add('anim');
+        }, 250);
+      });
+    });
+  }
+}
+
 document.querySelectorAll('.nav-i[data-page]').forEach(i=>{
   i.addEventListener('click',()=>{
     const p=i.dataset.page;
+    
+    // 导航项状态更新（带过渡动效）
     document.querySelectorAll('.nav-i').forEach(n=>n.classList.remove('active'));
     i.classList.add('active');
+    
+    // 面包屑更新
     document.getElementById('bcCur').textContent=i.querySelector('span:nth-child(2)').textContent;
-    document.querySelectorAll('[id^="page-"]').forEach(x=>x.style.display='none');
-    const t=document.getElementById('page-'+p);
-    if(t){
-      t.style.display='';
-      t.classList.remove('anim');
-      void t.offsetWidth;
-      t.classList.add('anim');
-      
-      // 更新统计数据
-      if(p === 'home') updateHomeStats();
-    } else {
-      document.getElementById('page-home').style.display='';
+    
+    // 使用新的页面切换函数
+    switchPageWithAnimation(p);
+    
+    // 更新统计数据
+    if(p === 'home') {
+      setTimeout(() => updateHomeStats(), 300);
     }
   })
 });
@@ -2745,8 +3124,14 @@ document.querySelectorAll('.cat-card[data-goto]').forEach(c=>{
 document.querySelectorAll('.pills').forEach(b=>{
   b.querySelectorAll('.pill').forEach(p=>{
     p.addEventListener('click',()=>{
+      // 添加点击动效
+      p.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        p.style.transform = '';
+      }, 100);
+      
       b.querySelectorAll('.pill').forEach(x=>x.classList.remove('active'));
-      p.classList.add('active')
+      p.classList.add('active');
     })
   })
 });
@@ -2754,8 +3139,14 @@ document.querySelectorAll('.pills').forEach(b=>{
 document.querySelectorAll('.kg').forEach(s=>{
   s.querySelectorAll('.chip').forEach(c=>{
     c.addEventListener('click',()=>{
+      // 添加点击动效
+      c.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        c.style.transform = '';
+      }, 100);
+      
       s.querySelectorAll('.chip').forEach(x=>x.classList.remove('active'));
-      c.classList.add('active')
+      c.classList.add('active');
     })
   })
 });
@@ -2763,8 +3154,14 @@ document.querySelectorAll('.kg').forEach(s=>{
 document.querySelectorAll('.ftabs').forEach(t=>{
   t.querySelectorAll('.ftab').forEach(f=>{
     f.addEventListener('click',()=>{
+      // 添加点击动效
+      f.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        f.style.transform = '';
+      }, 100);
+      
       t.querySelectorAll('.ftab').forEach(x=>x.classList.remove('active'));
-      f.classList.add('active')
+      f.classList.add('active');
     })
   })
 });
@@ -2790,6 +3187,22 @@ document.getElementById('searchInput').addEventListener('input',function(){
 
 // 主题切换事件绑定
 document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+
+// Hash 页面字符统计
+const hashInput = document.getElementById('hash-input');
+if (hashInput) {
+  function updateHashCharCount() {
+    const count = hashInput.value.length;
+    const charCountEl = document.getElementById('hash-char-count');
+    if (charCountEl) {
+      charCountEl.textContent = count + ' 字符';
+      charCountEl.style.color = count > 0 ? 'var(--text2)' : 'var(--text3)';
+    }
+  }
+  
+  hashInput.addEventListener('input', updateHashCharCount);
+  hashInput.addEventListener('paste', () => setTimeout(updateHashCharCount, 10));
+}
 
 // 页面加载完成后初始化应用
 document.addEventListener('DOMContentLoaded', initApp);
@@ -5762,22 +6175,29 @@ setTimeout(() => {
 
 // ═══ 初始化和主函数 ═══
 document.addEventListener('DOMContentLoaded', () => {
-  // 初始化主题
-  initTheme();
+  // 初始化应用
+  initApp();
   
   // 初始化统计数据
   updateHomeStats();
-  
-  // 显示欢迎消息
-  setTimeout(() => {
-    showToast('🔐 CryptoBox 已加载完成！按 Ctrl+Shift+T 运行测试', 'success', 3000);
-  }, 1000);
   
   // 检查 URL hash 是否需要自动操作
   if (window.location.hash === '#test') {
     setTimeout(() => {
       runAllTests();
     }, 2000);
+  }
+  
+  // 调试模式下显示欢迎消息
+  const isDebugMode = window.location.search.includes('debug=1') || 
+                     window.location.hash.includes('debug') ||
+                     window.location.protocol === 'file:' ||
+                     window.location.hostname === 'localhost';
+                     
+  if (isDebugMode) {
+    setTimeout(() => {
+      showToast('🔐 CryptoBox 已加载完成！按 Ctrl+Shift+T 运行测试', 'success', 3000);
+    }, 1000);
   }
 });
 
