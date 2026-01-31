@@ -39,7 +39,15 @@ function run() {
   try {
     switch (selected.value) {
       case '格式化': {
-        const parsed = JSON.parse(input.value)
+        // 先尝试去转义（处理双重转义的 JSON 字符串）
+        let raw = input.value.trim()
+        try {
+          const unescaped = JSON.parse(raw)
+          if (typeof unescaped === 'string') {
+            try { JSON.parse(unescaped); raw = unescaped } catch {}
+          }
+        } catch {}
+        const parsed = JSON.parse(raw)
         input.value = JSON.stringify(parsed, null, 2)
         treeData.value = parsed; isValid.value = true; break
       }
@@ -75,6 +83,22 @@ function downloadCode() {
 }
 
 const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLang.value))
+
+let editTimer = null
+function onInputEdit(val) {
+  // 手动编辑时延迟重新校验和生成代码
+  clearTimeout(editTimer)
+  editTimer = setTimeout(() => {
+    if (!val.trim()) { isValid.value = null; error.value = ''; codeOutput.value = ''; treeData.value = null; return }
+    try {
+      const parsed = JSON.parse(val)
+      isValid.value = true; error.value = ''; treeData.value = parsed
+      save(val); generateCode()
+    } catch (e) {
+      isValid.value = false; error.value = e.message; codeOutput.value = ''; treeData.value = null
+    }
+  }, 500)
+}
 </script>
 
 <template>
@@ -103,10 +127,7 @@ const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLan
         </label>
         <div :class="['flex flex-col rounded overflow-hidden transition-colors duration-200 flex-1',
           isValid === true ? 'border-2 border-emerald-500/60' : isValid === false ? 'border-2 border-red-500/60' : 'border border-[var(--border)]']">
-          <div v-if="treeData && selected === '格式化'" class="bg-[var(--bg-0)] p-4 min-h-[500px] max-h-[700px] overflow-auto mono text-[13px] leading-[1.8] flex-1">
-            <JsonTree :data="treeData" :root="true" />
-          </div>
-          <CodeEditor v-else v-model="input" placeholder='输入或粘贴 JSON...' minHeight="500px" />
+          <CodeEditor v-model="input" placeholder='输入或粘贴 JSON...' minHeight="500px" @update:modelValue="onInputEdit" />
           <div v-if="isValid === false" class="px-3 py-2 bg-red-500/10 border-t border-red-500/30 text-red-400 text-[12px] mono">
             ❌ {{ error }}
           </div>
