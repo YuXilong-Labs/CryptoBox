@@ -400,6 +400,47 @@ body::before {
   z-index: 50;
 }
 
+.key-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.key-wrap input, .key-wrap textarea {
+  flex: 1;
+  padding-right: 36px;
+}
+
+.copy-key-btn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 11px;
+  line-height: 1;
+  transition: all 0.2s;
+  z-index: 1;
+}
+
+.copy-key-btn:hover {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
+.copy-key-btn.copied {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green);
+}
+
 .menu-btn {
   display: none;
   align-items: center;
@@ -4866,6 +4907,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // 为所有 key/iv 输入框添加复制按钮
+  initCopyButtons();
+  
   // 初始化所有 pill 按钮交互
   initAllPills();
   
@@ -5859,6 +5903,77 @@ function initKeygenModule() {
   }
   
   console.log('🔐 密钥生成器已初始化');
+}
+
+function initCopyButtons() {
+  const keyIds = [
+    'aes-key', 'aes-iv',
+    'des-key', 'des-iv',
+    'chacha20-key', 'chacha20-nonce',
+    'blowfish-key', 'blowfish-iv',
+    'rc4-key',
+    'sm4-key', 'sm4-iv',
+    'rsa-public-key', 'rsa-private-key'
+  ];
+  
+  keyIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    
+    // 包裹元素
+    const parent = el.parentElement;
+    if (parent.classList.contains('key-wrap')) return; // 已处理
+    
+    const wrapper = document.createElement('div');
+    wrapper.className = 'key-wrap';
+    parent.insertBefore(wrapper, el);
+    wrapper.appendChild(el);
+    
+    // 创建复制按钮
+    const btn = document.createElement('button');
+    btn.className = 'copy-key-btn';
+    btn.textContent = '复制';
+    btn.type = 'button';
+    btn.addEventListener('click', () => {
+      const val = el.value || el.textContent;
+      if (!val || val === el.placeholder) {
+        showToast('没有可复制的内容', 'warning', 1500);
+        return;
+      }
+      navigator.clipboard.writeText(val).then(() => {
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        showToast('已复制到剪贴板', 'success', 1500);
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        // fallback
+        const ta = document.createElement('textarea');
+        ta.value = val;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        btn.textContent = '✓';
+        btn.classList.add('copied');
+        showToast('已复制到剪贴板', 'success', 1500);
+        setTimeout(() => {
+          btn.textContent = '复制';
+          btn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+    
+    wrapper.appendChild(btn);
+    
+    // textarea 的复制按钮位置调整
+    if (el.tagName === 'TEXTAREA') {
+      btn.style.top = '12px';
+      btn.style.transform = 'none';
+    }
+  });
 }
 
 function initAllPills() {
