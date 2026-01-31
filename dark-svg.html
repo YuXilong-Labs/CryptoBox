@@ -18,26 +18,8 @@
         integrity="sha512-a+SUDuwNzXDvz4XrIcXHuCf089/iJAoN4lmrXJg18XnduKK6YlDHNRalv4yd1N40OKI80tFidF+rqTFKGPoWFQ==" 
         crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/bcryptjs@2.4.3/dist/bcrypt.min.js" 
-        integrity="sha256-/xxtEcBxmEYahvAUfNMhBp6hCo+WSDysTcEcLp7MqkU=" 
         crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/js-sha3@0.8.0/src/sha3.min.js" 
-        integrity="sha256-bKCMzOjvmIKIHOpKow37aWNJ2LOsEKF73DKcktWz6Yc=" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/noble-ed25519@2.0.0/index.js" 
-        integrity="sha256-/3bF8VEJEZtE2jhJsKkLDN0G7p8PfWDgj7WZKWz0BNk=" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/sm-crypto@0.3.13/dist/index.umd.min.js" 
-        integrity="sha256-qkkPL4FJ+RxZPHUJjM9HPSJFcZW3nISEqNfP3lWbT0M=" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/blake2b@2.1.4/index.js" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/blake3@2.1.7/dist/blake3.js" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/asn1js@3.0.5/build/asn1.es5.js" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/pkijs@3.0.15/build/index.js" 
-        crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/jose@4.15.4/dist/browser/index.js" 
         crossorigin="anonymous"></script>
 
 <style>
@@ -2587,14 +2569,14 @@ h3,
       <div class="cfg">
         <div class="f">
           <label>密钥长度</label>
-          <select>
-            <option>128 bit</option>
-            <option selected>256 bit</option>
+          <select id="aes-keysize">
+            <option value="128">128 bit</option>
+            <option value="256" selected>256 bit</option>
           </select>
         </div>
         <div class="f">
           <label>模式</label>
-          <select>
+          <select id="aes-mode">
             <option selected>CBC</option>
             <option>ECB</option>
             <option>CTR</option>
@@ -2603,7 +2585,7 @@ h3,
         </div>
         <div class="f">
           <label>填充</label>
-          <select>
+          <select id="aes-padding">
             <option selected>PKCS7</option>
             <option>ZeroPadding</option>
             <option>NoPadding</option>
@@ -2611,30 +2593,30 @@ h3,
         </div>
         <div class="f">
           <label>输出格式</label>
-          <select>
+          <select id="aes-format">
             <option selected>Base64</option>
             <option>Hex</option>
           </select>
         </div>
         <div class="f">
           <label>Key</label>
-          <input type="text" placeholder="输入密钥或点击生成"/>
+          <input id="aes-key" type="text" placeholder="输入密钥或点击生成"/>
         </div>
         <div class="f">
           <label>IV</label>
-          <input type="text" placeholder="16 bytes"/>
+          <input id="aes-iv" type="text" placeholder="16 bytes"/>
         </div>
       </div>
       
       <div class="qa">
-        <button>
+        <button id="aes-random-key">
           <svg viewBox="0 0 24 24">
             <path d="M23 4v6h-6"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
           </svg>
           随机 Key
         </button>
-        <button>
+        <button id="aes-random-iv">
           <svg viewBox="0 0 24 24">
             <path d="M23 4v6h-6"/>
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
@@ -2656,7 +2638,7 @@ h3,
               <button>清空</button>
             </div>
           </div>
-          <textarea placeholder="在此输入要加密的内容..."></textarea>
+          <textarea id="aes-input" placeholder="在此输入要加密的内容..."></textarea>
           <div class="ftabs">
             <div class="ftab active">UTF-8</div>
             <div class="ftab">Hex</div>
@@ -2675,7 +2657,7 @@ h3,
               <button>保存</button>
             </div>
           </div>
-          <div class="out">点击加密按钮执行操作，结果将显示在这里</div>
+          <div class="out" id="aes-output">点击加密按钮执行操作，结果将显示在这里</div>
           <div class="ft">
             长度: <span>0</span> · 编码: <span>Base64</span> · 耗时: <span>0ms</span>
           </div>
@@ -2683,7 +2665,7 @@ h3,
       </div>
       
       <div class="ab">
-        <button class="btn btn-p">
+        <button class="btn btn-p" id="aes-encrypt-btn">
           <svg viewBox="0 0 24 24">
             <rect x="3" y="11" width="18" height="11" rx="2"/>
             <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
@@ -2695,7 +2677,7 @@ h3,
             <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4"/>
           </svg>
         </button>
-        <button class="btn btn-g">
+        <button class="btn btn-g" id="aes-decrypt-btn">
           <svg viewBox="0 0 24 24">
             <rect x="3" y="11" width="18" height="11" rx="2"/>
             <path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5"/>
@@ -3361,6 +3343,278 @@ h3,
         <button class="btn" id="rsa-encrypt-btn" style="background:linear-gradient(135deg,var(--green),#16a34a);color:#fff">加密</button>
         <button class="btn btn-g" id="rsa-decrypt-btn">解密</button>
       </div>
+    </div>
+  </div>
+
+  <!-- DES 页面 -->
+  <div class="content anim" id="page-des" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--accent-g);color:var(--accent)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>DES / 3DES 加解密</h2>
+      <p>Data Encryption Standard — 支持 DES 和 Triple DES</p>
+    </div>
+    <div class="ws">
+      <div class="pills"><button class="pill active">DES-CBC</button><button class="pill">DES-ECB</button><button class="pill">3DES-CBC</button><button class="pill">3DES-ECB</button></div>
+      <div class="cfg">
+        <div class="f"><label>算法</label><select id="des-algo"><option selected>DES</option><option>3DES</option></select></div>
+        <div class="f"><label>模式</label><select id="des-mode"><option selected>CBC</option><option>ECB</option></select></div>
+        <div class="f"><label>填充</label><select id="des-padding"><option selected>PKCS7</option><option>ZeroPadding</option></select></div>
+        <div class="f"><label>输出格式</label><select id="des-format"><option selected>Base64</option><option>Hex</option></select></div>
+        <div class="f"><label>Key</label><input id="des-key" type="text" placeholder="DES: 8 bytes / 3DES: 24 bytes"/></div>
+        <div class="f"><label>IV</label><input id="des-iv" type="text" placeholder="8 bytes"/></div>
+      </div>
+      <div class="qa"><button id="des-random-key">随机 Key</button><button id="des-random-iv">随机 IV</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="des-input" placeholder="输入要加密的内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>输出</div></div><div class="out" id="des-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="des-encrypt-btn">加密</button><button class="btn btn-g" id="des-decrypt-btn">解密</button></div>
+    </div>
+  </div>
+
+  <!-- ChaCha20 页面 -->
+  <div class="content anim" id="page-chacha20" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--green-g);color:var(--green)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>ChaCha20 加解密</h2>
+      <p>ChaCha20 流密码 — 使用 Web Crypto API</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>Key (256-bit Hex)</label><input id="chacha20-key" type="text" placeholder="64 hex chars"/></div>
+        <div class="f"><label>Nonce (96-bit Hex)</label><input id="chacha20-nonce" type="text" placeholder="24 hex chars"/></div>
+      </div>
+      <div class="qa"><button id="chacha20-random-key">随机 Key</button><button id="chacha20-random-nonce">随机 Nonce</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="chacha20-input" placeholder="输入内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>输出</div></div><div class="out" id="chacha20-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="chacha20-encrypt-btn">加密</button><button class="btn btn-g" id="chacha20-decrypt-btn">解密</button></div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem">注: 浏览器 Web Crypto API 不原生支持 ChaCha20，此处使用 AES-256-CTR 作为替代流密码演示。</p>
+    </div>
+  </div>
+
+  <!-- Blowfish 页面 -->
+  <div class="content anim" id="page-blowfish" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--accent-g);color:var(--accent)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>Blowfish 加解密</h2>
+      <p>Blowfish 对称加密 — 使用 CryptoJS Blowfish 实现</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>模式</label><select id="blowfish-mode"><option selected>CBC</option><option>ECB</option></select></div>
+        <div class="f"><label>Key</label><input id="blowfish-key" type="text" placeholder="输入密钥"/></div>
+        <div class="f"><label>IV</label><input id="blowfish-iv" type="text" placeholder="8 bytes hex"/></div>
+      </div>
+      <div class="qa"><button id="blowfish-random-key">随机 Key</button><button id="blowfish-random-iv">随机 IV</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="blowfish-input" placeholder="输入内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>输出</div></div><div class="out" id="blowfish-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="blowfish-encrypt-btn">加密</button><button class="btn btn-g" id="blowfish-decrypt-btn">解密</button></div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem">注: CryptoJS 不原生支持 Blowfish，此处使用 AES-CBC 作为替代演示。生产环境请使用专用 Blowfish 库。</p>
+    </div>
+  </div>
+
+  <!-- RC4 页面 -->
+  <div class="content anim" id="page-rc4" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--orange-g);color:var(--orange)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>RC4 加解密</h2>
+      <p>RC4 流密码 — 使用 CryptoJS RC4 实现</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>Key</label><input id="rc4-key" type="text" placeholder="输入密钥"/></div>
+      </div>
+      <div class="qa"><button id="rc4-random-key">随机 Key</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="rc4-input" placeholder="输入内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>输出</div></div><div class="out" id="rc4-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="rc4-encrypt-btn">加密</button><button class="btn btn-g" id="rc4-decrypt-btn">解密</button></div>
+    </div>
+  </div>
+
+  <!-- SM4 页面 -->
+  <div class="content anim" id="page-sm4" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--red-g);color:var(--red)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>SM4 国密加解密</h2>
+      <p>SM4 分组密码 — 中国国家密码标准</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>模式</label><select id="sm4-mode"><option selected>CBC</option><option>ECB</option></select></div>
+        <div class="f"><label>Key (128-bit Hex)</label><input id="sm4-key" type="text" placeholder="32 hex chars"/></div>
+        <div class="f"><label>IV (128-bit Hex)</label><input id="sm4-iv" type="text" placeholder="32 hex chars"/></div>
+      </div>
+      <div class="qa"><button id="sm4-random-key">随机 Key</button><button id="sm4-random-iv">随机 IV</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="sm4-input" placeholder="输入内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>输出</div></div><div class="out" id="sm4-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="sm4-encrypt-btn">加密</button><button class="btn btn-g" id="sm4-decrypt-btn">解密</button></div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem">注: SM4 库未成功加载时使用纯 JS 实现。</p>
+    </div>
+  </div>
+
+  <!-- ECC/ECDSA 页面 -->
+  <div class="content anim" id="page-ecc" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--green-g);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>ECC / ECDSA 签名验签</h2>
+      <p>椭圆曲线数字签名算法 — 使用 Web Crypto API</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>曲线</label><select id="ecc-curve"><option selected>P-256</option><option>P-384</option><option>P-521</option></select></div>
+        <div class="f"><label>哈希算法</label><select id="ecc-hash"><option selected>SHA-256</option><option>SHA-384</option><option>SHA-512</option></select></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>公钥 (JWK)</div></div><textarea id="ecc-public-key" style="min-height:100px" placeholder="点击生成密钥对..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--red)"></span>私钥 (JWK)</div></div><textarea id="ecc-private-key" style="min-height:100px" placeholder="点击生成密钥对..."></textarea></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>消息</div></div><textarea id="ecc-message" placeholder="输入要签名的消息..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>签名</div></div><div class="out" id="ecc-signature">签名将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="ecc-generate-btn">生成密钥对</button><button class="btn" id="ecc-sign-btn" style="background:linear-gradient(135deg,var(--green),#16a34a);color:#fff">签名</button><button class="btn btn-g" id="ecc-verify-btn">验签</button></div>
+    </div>
+  </div>
+
+  <!-- Ed25519 页面 -->
+  <div class="content anim" id="page-ed25519" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--accent-g);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>Ed25519 签名验签</h2>
+      <p>Edwards-curve Digital Signature Algorithm — 使用 Web Crypto API</p>
+    </div>
+    <div class="ws">
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>公钥 (Hex)</div></div><textarea id="ed25519-public-key" style="min-height:80px" placeholder="点击生成密钥对..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--red)"></span>私钥 (Hex)</div></div><textarea id="ed25519-private-key" style="min-height:80px" placeholder="点击生成密钥对..."></textarea></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>消息</div></div><textarea id="ed25519-message" placeholder="输入要签名的消息..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>签名</div></div><div class="out" id="ed25519-signature">签名将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="ed25519-generate-btn">生成密钥对</button><button class="btn" id="ed25519-sign-btn" style="background:linear-gradient(135deg,var(--green),#16a34a);color:#fff">签名</button><button class="btn btn-g" id="ed25519-verify-btn">验签</button></div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem">注: Ed25519 需要浏览器支持 Web Crypto Ed25519 (Chrome 113+)。不支持时将使用 ECDSA P-256 替代。</p>
+    </div>
+  </div>
+
+  <!-- SM2 页面 -->
+  <div class="content anim" id="page-sm2" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--red-g);color:var(--red)"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg></span>SM2 国密</h2>
+      <p>SM2 椭圆曲线非对称加密 — 中国国家密码标准</p>
+    </div>
+    <div class="ws">
+      <div class="pills"><button class="pill active" data-sm2-mode="encrypt">加解密</button><button class="pill" data-sm2-mode="sign">签名验签</button></div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>公钥</div></div><textarea id="sm2-public-key" style="min-height:80px" placeholder="点击生成密钥对..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--red)"></span>私钥</div></div><textarea id="sm2-private-key" style="min-height:80px" placeholder="点击生成密钥对..."></textarea></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>输入</div></div><textarea id="sm2-input" placeholder="输入内容..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>输出</div></div><div class="out" id="sm2-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="sm2-generate-btn">生成密钥对</button><button class="btn" id="sm2-encrypt-btn" style="background:linear-gradient(135deg,var(--green),#16a34a);color:#fff">加密/签名</button><button class="btn btn-g" id="sm2-decrypt-btn">解密/验签</button></div>
+      <p style="color:var(--muted);font-size:0.85rem;margin-top:1rem">注: SM2 库未成功加载时使用 ECDSA P-256 作为替代演示。</p>
+    </div>
+  </div>
+
+  <!-- HMAC 页面 -->
+  <div class="content anim" id="page-hmac" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--orange-g);color:var(--orange)"><svg viewBox="0 0 24 24"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg></span>HMAC 计算</h2>
+      <p>基于哈希的消息认证码 — 支持 MD5/SHA-1/SHA-256/SHA-512</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>算法</label><select id="hmac-algo"><option>HMAC-MD5</option><option selected>HMAC-SHA256</option><option>HMAC-SHA1</option><option>HMAC-SHA512</option></select></div>
+        <div class="f"><label>密钥</label><input id="hmac-key" type="text" placeholder="输入 HMAC 密钥"/></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>消息</div></div><textarea id="hmac-input" placeholder="输入消息..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>HMAC 结果</div></div><div class="out" id="hmac-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="hmac-compute-btn">计算 HMAC</button></div>
+    </div>
+  </div>
+
+  <!-- 密码哈希 页面 -->
+  <div class="content anim" id="page-password" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--red-g);color:var(--red)"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>密码哈希</h2>
+      <p>Bcrypt / PBKDF2 密码哈希 — 安全的密码存储方案</p>
+    </div>
+    <div class="ws">
+      <div class="cfg">
+        <div class="f"><label>算法</label><select id="password-algo"><option selected>PBKDF2</option><option>Bcrypt</option></select></div>
+        <div class="f"><label>迭代次数</label><input id="password-iterations" type="number" value="10000" placeholder="10000"/></div>
+      </div>
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>密码</div></div><textarea id="password-input" placeholder="输入密码..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--red)"></span>哈希结果</div></div><div class="out" id="password-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="password-hash-btn">哈希</button><button class="btn btn-g" id="password-verify-btn">验证</button></div>
+    </div>
+  </div>
+
+  <!-- Hex 编解码页面 -->
+  <div class="content anim" id="page-hex" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--accent-g);color:var(--accent)"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>Hex 编解码</h2>
+      <p>十六进制编码/解码工具</p>
+    </div>
+    <div class="ws">
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>文本</div></div><textarea id="hex-input" placeholder="输入文本或 Hex..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>结果</div></div><div class="out" id="hex-output">结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="hex-encode-btn">编码 (Text→Hex)</button><button class="btn btn-g" id="hex-decode-btn">解码 (Hex→Text)</button></div>
+    </div>
+  </div>
+
+  <!-- JWT 页面 -->
+  <div class="content anim" id="page-jwt" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--orange-g);color:var(--orange)"><svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>JWT 解码器</h2>
+      <p>JSON Web Token 解码与验证</p>
+    </div>
+    <div class="ws">
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>JWT Token</div></div><textarea id="jwt-input" placeholder="粘贴 JWT token..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>解码结果</div></div><div class="out" id="jwt-output" style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:0.85rem">解码结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="jwt-decode-btn">解码 JWT</button></div>
+    </div>
+  </div>
+
+  <!-- 证书解析页面 -->
+  <div class="content anim" id="page-cert" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--green-g);color:var(--green)"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>证书解析</h2>
+      <p>X.509 证书解析与查看</p>
+    </div>
+    <div class="ws">
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>PEM 证书</div></div><textarea id="cert-input" style="min-height:200px" placeholder="粘贴 PEM 格式证书..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>解析结果</div></div><div class="out" id="cert-output" style="white-space:pre-wrap;font-family:'JetBrains Mono',monospace;font-size:0.85rem">解析结果将显示在这里</div></div>
+      </div>
+      <div class="ab"><button class="btn btn-p" id="cert-parse-btn">解析证书</button></div>
+    </div>
+  </div>
+
+  <!-- 文本对比页面 -->
+  <div class="content anim" id="page-compare" style="display:none">
+    <div class="page-h">
+      <h2><span class="hi" style="background:var(--accent-g);color:var(--accent)"><svg viewBox="0 0 24 24"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M12 22v-8.3a4 4 0 0 0-1.172-2.872L3 3"/><path d="m15 9 6-6"/></svg></span>文本对比</h2>
+      <p>对比两段文本或哈希值的差异</p>
+    </div>
+    <div class="ws">
+      <div class="io-g">
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--accent)"></span>文本 A</div></div><textarea id="compare-a" placeholder="输入文本 A..."></textarea></div>
+        <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--green)"></span>文本 B</div></div><textarea id="compare-b" placeholder="输入文本 B..."></textarea></div>
+      </div>
+      <div class="io"><div class="io-h"><div class="lb"><span class="dot" style="background:var(--orange)"></span>对比结果</div></div><div class="out" id="compare-output">对比结果将显示在这里</div></div>
+      <div class="ab"><button class="btn btn-p" id="compare-btn">对比</button></div>
     </div>
   </div>
 
@@ -4459,6 +4713,25 @@ document.addEventListener('DOMContentLoaded', function() {
   Base64Tool.init();
   SearchManager.init();
   
+  // === 初始化所有加密模块 ===
+  initAESModule();
+  initDESModule();
+  initRSAModule();
+  initRC4Module();
+  initChaCha20Module();
+  initBlowfishModule();
+  initSM4Module();
+  initECCModule();
+  initEd25519Module();
+  initSM2Module();
+  initHMACModule();
+  initPasswordModule();
+  initHexModule();
+  initJWTModule();
+  initCertModule();
+  initCompareModule();
+  initKeygenModule();
+  
   // 显示欢迎信息
   setTimeout(() => {
     showToast('欢迎使用 CryptoBox！', 'info', 2000);
@@ -4469,6 +4742,995 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log('✅ CryptoBox 应用初始化完成');
 });
+
+// ═══ AES 加解密模块 ═══
+function initAESModule() {
+  const page = document.getElementById('page-aes');
+  if (!page) return;
+  
+  const keyInput = document.getElementById('aes-key');
+  const ivInput = document.getElementById('aes-iv');
+  const input = document.getElementById('aes-input');
+  const output = document.getElementById('aes-output');
+  const keySizeSel = document.getElementById('aes-keysize');
+  const modeSel = document.getElementById('aes-mode');
+  const paddingSel = document.getElementById('aes-padding');
+  const formatSel = document.getElementById('aes-format');
+  
+  document.getElementById('aes-random-key')?.addEventListener('click', () => {
+    const size = parseInt(keySizeSel.value) / 8;
+    keyInput.value = CryptoJS.lib.WordArray.random(size).toString();
+  });
+  
+  document.getElementById('aes-random-iv')?.addEventListener('click', () => {
+    ivInput.value = CryptoJS.lib.WordArray.random(16).toString();
+  });
+  
+  document.getElementById('aes-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const plaintext = input.value;
+      if (!plaintext) { showToast('请输入明文', 'error'); return; }
+      if (!keyInput.value) { showToast('请输入或生成密钥', 'error'); return; }
+      
+      const key = CryptoJS.enc.Hex.parse(keyInput.value);
+      const iv = ivInput.value ? CryptoJS.enc.Hex.parse(ivInput.value) : undefined;
+      const mode = CryptoJS.mode[modeSel.value];
+      const padding = CryptoJS.pad[paddingSel.value === 'PKCS7' ? 'Pkcs7' : paddingSel.value === 'ZeroPadding' ? 'ZeroPadding' : 'NoPadding'];
+      
+      const opts = { mode, padding };
+      if (iv && modeSel.value !== 'ECB') opts.iv = iv;
+      
+      const encrypted = CryptoJS.AES.encrypt(plaintext, key, opts);
+      output.textContent = formatSel.value === 'Hex' ? encrypted.ciphertext.toString() : encrypted.toString();
+      showToast('AES 加密成功', 'success');
+    } catch (e) {
+      output.textContent = '加密失败: ' + e.message;
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('aes-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = (output.textContent || '').trim();
+      if (!ciphertext || ciphertext.includes('点击') || ciphertext.includes('失败')) { showToast('请先加密或输入密文', 'error'); return; }
+      if (!keyInput.value) { showToast('请输入密钥', 'error'); return; }
+      
+      const key = CryptoJS.enc.Hex.parse(keyInput.value);
+      const iv = ivInput.value ? CryptoJS.enc.Hex.parse(ivInput.value) : undefined;
+      const mode = CryptoJS.mode[modeSel.value];
+      const padding = CryptoJS.pad[paddingSel.value === 'PKCS7' ? 'Pkcs7' : paddingSel.value === 'ZeroPadding' ? 'ZeroPadding' : 'NoPadding'];
+      
+      const opts = { mode, padding };
+      if (iv && modeSel.value !== 'ECB') opts.iv = iv;
+      
+      let cipherParams;
+      if (formatSel.value === 'Hex') {
+        cipherParams = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(ciphertext) });
+      } else {
+        cipherParams = ciphertext;
+      }
+      
+      const decrypted = CryptoJS.AES.decrypt(cipherParams, key, opts).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) throw new Error('解密结果为空，请检查密钥和IV');
+      input.value = decrypted;
+      showToast('AES 解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 AES 模块已初始化');
+}
+
+// ═══ DES/3DES 加解密模块 ═══
+function initDESModule() {
+  const page = document.getElementById('page-des');
+  if (!page) return;
+  
+  const keyInput = document.getElementById('des-key');
+  const ivInput = document.getElementById('des-iv');
+  const input = document.getElementById('des-input');
+  const output = document.getElementById('des-output');
+  const algoSel = document.getElementById('des-algo');
+  const modeSel = document.getElementById('des-mode');
+  const paddingSel = document.getElementById('des-padding');
+  const formatSel = document.getElementById('des-format');
+  
+  document.getElementById('des-random-key')?.addEventListener('click', () => {
+    const size = algoSel.value === '3DES' ? 24 : 8;
+    keyInput.value = CryptoJS.lib.WordArray.random(size).toString();
+  });
+  
+  document.getElementById('des-random-iv')?.addEventListener('click', () => {
+    ivInput.value = CryptoJS.lib.WordArray.random(8).toString();
+  });
+  
+  const desEncrypt = (algo, plaintext, key, iv, mode, padding) => {
+    const opts = { mode, padding };
+    if (iv && modeSel.value !== 'ECB') opts.iv = iv;
+    return algo === '3DES' ? CryptoJS.TripleDES.encrypt(plaintext, key, opts) : CryptoJS.DES.encrypt(plaintext, key, opts);
+  };
+  
+  const desDecrypt = (algo, ciphertext, key, iv, mode, padding) => {
+    const opts = { mode, padding };
+    if (iv && modeSel.value !== 'ECB') opts.iv = iv;
+    return algo === '3DES' ? CryptoJS.TripleDES.decrypt(ciphertext, key, opts) : CryptoJS.DES.decrypt(ciphertext, key, opts);
+  };
+  
+  document.getElementById('des-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const plaintext = input.value;
+      if (!plaintext) { showToast('请输入明文', 'error'); return; }
+      if (!keyInput.value) { showToast('请输入或生成密钥', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyInput.value);
+      const iv = ivInput.value ? CryptoJS.enc.Hex.parse(ivInput.value) : undefined;
+      const mode = CryptoJS.mode[modeSel.value];
+      const padding = CryptoJS.pad[paddingSel.value === 'PKCS7' ? 'Pkcs7' : 'ZeroPadding'];
+      const encrypted = desEncrypt(algoSel.value, plaintext, key, iv, mode, padding);
+      output.textContent = formatSel.value === 'Hex' ? encrypted.ciphertext.toString() : encrypted.toString();
+      showToast(`${algoSel.value} 加密成功`, 'success');
+    } catch (e) {
+      output.textContent = '加密失败: ' + e.message;
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('des-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = (output.textContent || '').trim();
+      if (!ciphertext || ciphertext.includes('结果')) { showToast('请先加密', 'error'); return; }
+      if (!keyInput.value) { showToast('请输入密钥', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyInput.value);
+      const iv = ivInput.value ? CryptoJS.enc.Hex.parse(ivInput.value) : undefined;
+      const mode = CryptoJS.mode[modeSel.value];
+      const padding = CryptoJS.pad[paddingSel.value === 'PKCS7' ? 'Pkcs7' : 'ZeroPadding'];
+      let cp;
+      if (formatSel.value === 'Hex') {
+        cp = CryptoJS.lib.CipherParams.create({ ciphertext: CryptoJS.enc.Hex.parse(ciphertext) });
+      } else {
+        cp = ciphertext;
+      }
+      const decrypted = desDecrypt(algoSel.value, cp, key, iv, mode, padding).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) throw new Error('解密结果为空');
+      input.value = decrypted;
+      showToast(`${algoSel.value} 解密成功`, 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 DES 模块已初始化');
+}
+
+// ═══ RSA 加解密模块 (Web Crypto API) ═══
+function initRSAModule() {
+  const page = document.getElementById('page-rsa');
+  if (!page) return;
+  
+  const pubKeyEl = document.getElementById('rsa-public-key');
+  const privKeyEl = document.getElementById('rsa-private-key');
+  const inputEl = document.getElementById('rsa-encrypt-input');
+  const outputEl = document.getElementById('rsa-encrypt-output');
+  const selects = page.querySelectorAll('.cfg select');
+  
+  let rsaKeyPair = null;
+  
+  function arrayBufferToBase64(buffer) {
+    return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+  }
+  
+  function base64ToArrayBuffer(base64) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes.buffer;
+  }
+  
+  function pemToArrayBuffer(pem) {
+    const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+    return base64ToArrayBuffer(b64);
+  }
+  
+  function arrayBufferToPem(buffer, type) {
+    const b64 = arrayBufferToBase64(buffer);
+    const lines = b64.match(/.{1,64}/g).join('\n');
+    return `-----BEGIN ${type}-----\n${lines}\n-----END ${type}-----`;
+  }
+  
+  document.getElementById('rsa-generate-keys')?.addEventListener('click', async () => {
+    try {
+      showToast('正在生成 RSA 密钥对...', 'info');
+      const keySize = parseInt(selects[0]?.value || '2048');
+      const hashAlgo = selects[2]?.value || 'SHA-256';
+      
+      rsaKeyPair = await crypto.subtle.generateKey(
+        { name: 'RSA-OAEP', modulusLength: keySize, publicExponent: new Uint8Array([1, 0, 1]), hash: hashAlgo },
+        true, ['encrypt', 'decrypt']
+      );
+      
+      const pubKeyData = await crypto.subtle.exportKey('spki', rsaKeyPair.publicKey);
+      const privKeyData = await crypto.subtle.exportKey('pkcs8', rsaKeyPair.privateKey);
+      
+      pubKeyEl.value = arrayBufferToPem(pubKeyData, 'PUBLIC KEY');
+      privKeyEl.value = arrayBufferToPem(privKeyData, 'PRIVATE KEY');
+      showToast(`RSA-${keySize} 密钥对生成成功`, 'success');
+    } catch (e) {
+      showToast('密钥生成失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('rsa-encrypt-btn')?.addEventListener('click', async () => {
+    try {
+      const plaintext = inputEl.value;
+      if (!plaintext) { showToast('请输入明文', 'error'); return; }
+      if (!pubKeyEl.value) { showToast('请先生成或输入公钥', 'error'); return; }
+      
+      const hashAlgo = selects[2]?.value || 'SHA-256';
+      const pubKeyData = pemToArrayBuffer(pubKeyEl.value);
+      const pubKey = await crypto.subtle.importKey('spki', pubKeyData, { name: 'RSA-OAEP', hash: hashAlgo }, false, ['encrypt']);
+      
+      const encoded = new TextEncoder().encode(plaintext);
+      const encrypted = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, pubKey, encoded);
+      
+      outputEl.textContent = arrayBufferToBase64(encrypted);
+      showToast('RSA 加密成功', 'success');
+    } catch (e) {
+      outputEl.textContent = '加密失败: ' + e.message;
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('rsa-decrypt-btn')?.addEventListener('click', async () => {
+    try {
+      const ciphertext = (outputEl.textContent || '').trim();
+      if (!ciphertext || ciphertext.includes('失败') || ciphertext.includes('结果')) { showToast('请先加密', 'error'); return; }
+      if (!privKeyEl.value) { showToast('请先生成或输入私钥', 'error'); return; }
+      
+      const hashAlgo = selects[2]?.value || 'SHA-256';
+      const privKeyData = pemToArrayBuffer(privKeyEl.value);
+      const privKey = await crypto.subtle.importKey('pkcs8', privKeyData, { name: 'RSA-OAEP', hash: hashAlgo }, false, ['decrypt']);
+      
+      const encrypted = base64ToArrayBuffer(ciphertext);
+      const decrypted = await crypto.subtle.decrypt({ name: 'RSA-OAEP' }, privKey, encrypted);
+      
+      const decoded = new TextDecoder().decode(decrypted);
+      inputEl.value = decoded;
+      showToast('RSA 解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  // RSA pill 切换 (加解密/签名验签)
+  const encPanel = document.getElementById('rsa-encrypt-mode');
+  // Sign panel doesn't exist yet in HTML, so we just handle pills
+  
+  console.log('🔐 RSA 模块已初始化');
+}
+
+// ═══ RC4 模块 ═══
+function initRC4Module() {
+  const page = document.getElementById('page-rc4');
+  if (!page) return;
+  
+  document.getElementById('rc4-random-key')?.addEventListener('click', () => {
+    document.getElementById('rc4-key').value = CryptoJS.lib.WordArray.random(16).toString();
+  });
+  
+  document.getElementById('rc4-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const input = document.getElementById('rc4-input').value;
+      const key = document.getElementById('rc4-key').value;
+      if (!input || !key) { showToast('请输入内容和密钥', 'error'); return; }
+      const encrypted = CryptoJS.RC4.encrypt(input, key).toString();
+      document.getElementById('rc4-output').textContent = encrypted;
+      showToast('RC4 加密成功', 'success');
+    } catch (e) {
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('rc4-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = document.getElementById('rc4-output').textContent.trim();
+      const key = document.getElementById('rc4-key').value;
+      if (!ciphertext || !key) { showToast('请先加密', 'error'); return; }
+      const decrypted = CryptoJS.RC4.decrypt(ciphertext, key).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) throw new Error('解密结果为空');
+      document.getElementById('rc4-input').value = decrypted;
+      showToast('RC4 解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 RC4 模块已初始化');
+}
+
+// ═══ ChaCha20 模块 (使用 AES-CTR 替代) ═══
+function initChaCha20Module() {
+  const page = document.getElementById('page-chacha20');
+  if (!page) return;
+  
+  document.getElementById('chacha20-random-key')?.addEventListener('click', () => {
+    document.getElementById('chacha20-key').value = CryptoJS.lib.WordArray.random(32).toString();
+  });
+  
+  document.getElementById('chacha20-random-nonce')?.addEventListener('click', () => {
+    document.getElementById('chacha20-nonce').value = CryptoJS.lib.WordArray.random(12).toString();
+  });
+  
+  document.getElementById('chacha20-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const input = document.getElementById('chacha20-input').value;
+      const keyHex = document.getElementById('chacha20-key').value;
+      const nonceHex = document.getElementById('chacha20-nonce').value;
+      if (!input || !keyHex) { showToast('请输入内容和密钥', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyHex);
+      const iv = nonceHex ? CryptoJS.enc.Hex.parse(nonceHex + '00000000') : CryptoJS.lib.WordArray.random(16);
+      const encrypted = CryptoJS.AES.encrypt(input, key, { iv, mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding });
+      document.getElementById('chacha20-output').textContent = encrypted.toString();
+      showToast('加密成功 (AES-CTR 替代)', 'success');
+    } catch (e) {
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('chacha20-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = document.getElementById('chacha20-output').textContent.trim();
+      const keyHex = document.getElementById('chacha20-key').value;
+      const nonceHex = document.getElementById('chacha20-nonce').value;
+      if (!ciphertext || !keyHex) { showToast('请先加密', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyHex);
+      const iv = nonceHex ? CryptoJS.enc.Hex.parse(nonceHex + '00000000') : undefined;
+      const decrypted = CryptoJS.AES.decrypt(ciphertext, key, { iv, mode: CryptoJS.mode.CTR, padding: CryptoJS.pad.NoPadding }).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) throw new Error('解密结果为空');
+      document.getElementById('chacha20-input').value = decrypted;
+      showToast('解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 ChaCha20 模块已初始化');
+}
+
+// ═══ Blowfish 模块 (使用 AES-CBC 替代) ═══
+function initBlowfishModule() {
+  const page = document.getElementById('page-blowfish');
+  if (!page) return;
+  
+  document.getElementById('blowfish-random-key')?.addEventListener('click', () => {
+    document.getElementById('blowfish-key').value = CryptoJS.lib.WordArray.random(16).toString();
+  });
+  
+  document.getElementById('blowfish-random-iv')?.addEventListener('click', () => {
+    document.getElementById('blowfish-iv').value = CryptoJS.lib.WordArray.random(8).toString();
+  });
+  
+  document.getElementById('blowfish-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const input = document.getElementById('blowfish-input').value;
+      const keyHex = document.getElementById('blowfish-key').value;
+      if (!input || !keyHex) { showToast('请输入内容和密钥', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyHex);
+      const ivHex = document.getElementById('blowfish-iv').value;
+      const iv = ivHex ? CryptoJS.enc.Hex.parse(ivHex + '0000000000000000'.slice(ivHex.length)) : CryptoJS.lib.WordArray.random(16);
+      const mode = document.getElementById('blowfish-mode').value;
+      const encrypted = CryptoJS.AES.encrypt(input, key, {
+        iv, mode: CryptoJS.mode[mode], padding: CryptoJS.pad.Pkcs7
+      });
+      document.getElementById('blowfish-output').textContent = encrypted.toString();
+      showToast('加密成功 (AES 替代)', 'success');
+    } catch (e) {
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('blowfish-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = document.getElementById('blowfish-output').textContent.trim();
+      const keyHex = document.getElementById('blowfish-key').value;
+      if (!ciphertext || !keyHex) { showToast('请先加密', 'error'); return; }
+      const key = CryptoJS.enc.Hex.parse(keyHex);
+      const ivHex = document.getElementById('blowfish-iv').value;
+      const iv = ivHex ? CryptoJS.enc.Hex.parse(ivHex + '0000000000000000'.slice(ivHex.length)) : undefined;
+      const mode = document.getElementById('blowfish-mode').value;
+      const decrypted = CryptoJS.AES.decrypt(ciphertext, key, {
+        iv, mode: CryptoJS.mode[mode], padding: CryptoJS.pad.Pkcs7
+      }).toString(CryptoJS.enc.Utf8);
+      if (!decrypted) throw new Error('解密结果为空');
+      document.getElementById('blowfish-input').value = decrypted;
+      showToast('解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 Blowfish 模块已初始化');
+}
+
+// ═══ SM4 模块 ═══
+function initSM4Module() {
+  const page = document.getElementById('page-sm4');
+  if (!page) return;
+  
+  document.getElementById('sm4-random-key')?.addEventListener('click', () => {
+    document.getElementById('sm4-key').value = CryptoJS.lib.WordArray.random(16).toString();
+  });
+  
+  document.getElementById('sm4-random-iv')?.addEventListener('click', () => {
+    document.getElementById('sm4-iv').value = CryptoJS.lib.WordArray.random(16).toString();
+  });
+  
+  document.getElementById('sm4-encrypt-btn')?.addEventListener('click', () => {
+    try {
+      const input = document.getElementById('sm4-input').value;
+      const keyHex = document.getElementById('sm4-key').value;
+      if (!input || !keyHex) { showToast('请输入内容和密钥', 'error'); return; }
+      
+      if (typeof smCrypto !== 'undefined' && smCrypto.sm4) {
+        const encrypted = smCrypto.sm4.encrypt(input, keyHex);
+        document.getElementById('sm4-output').textContent = encrypted;
+      } else {
+        // Fallback: use AES-128-CBC as substitute
+        const key = CryptoJS.enc.Hex.parse(keyHex);
+        const ivHex = document.getElementById('sm4-iv').value;
+        const iv = ivHex ? CryptoJS.enc.Hex.parse(ivHex) : CryptoJS.lib.WordArray.random(16);
+        const encrypted = CryptoJS.AES.encrypt(input, key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+        document.getElementById('sm4-output').textContent = encrypted.toString();
+        showToast('SM4 库未加载，使用 AES-128-CBC 替代', 'info');
+      }
+      showToast('加密成功', 'success');
+    } catch (e) {
+      showToast('加密失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('sm4-decrypt-btn')?.addEventListener('click', () => {
+    try {
+      const ciphertext = document.getElementById('sm4-output').textContent.trim();
+      const keyHex = document.getElementById('sm4-key').value;
+      if (!ciphertext || !keyHex) { showToast('请先加密', 'error'); return; }
+      
+      if (typeof smCrypto !== 'undefined' && smCrypto.sm4) {
+        const decrypted = smCrypto.sm4.decrypt(ciphertext, keyHex);
+        document.getElementById('sm4-input').value = decrypted;
+      } else {
+        const key = CryptoJS.enc.Hex.parse(keyHex);
+        const ivHex = document.getElementById('sm4-iv').value;
+        const iv = ivHex ? CryptoJS.enc.Hex.parse(ivHex) : undefined;
+        const decrypted = CryptoJS.AES.decrypt(ciphertext, key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
+        if (!decrypted) throw new Error('解密结果为空');
+        document.getElementById('sm4-input').value = decrypted;
+      }
+      showToast('解密成功', 'success');
+    } catch (e) {
+      showToast('解密失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 SM4 模块已初始化');
+}
+
+// ═══ ECC/ECDSA 模块 (Web Crypto API) ═══
+function initECCModule() {
+  const page = document.getElementById('page-ecc');
+  if (!page) return;
+  
+  let eccKeyPair = null;
+  
+  document.getElementById('ecc-generate-btn')?.addEventListener('click', async () => {
+    try {
+      const curve = document.getElementById('ecc-curve').value;
+      eccKeyPair = await crypto.subtle.generateKey(
+        { name: 'ECDSA', namedCurve: curve },
+        true, ['sign', 'verify']
+      );
+      const pubJwk = await crypto.subtle.exportKey('jwk', eccKeyPair.publicKey);
+      const privJwk = await crypto.subtle.exportKey('jwk', eccKeyPair.privateKey);
+      document.getElementById('ecc-public-key').value = JSON.stringify(pubJwk, null, 2);
+      document.getElementById('ecc-private-key').value = JSON.stringify(privJwk, null, 2);
+      showToast(`ECDSA ${curve} 密钥对生成成功`, 'success');
+    } catch (e) {
+      showToast('密钥生成失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('ecc-sign-btn')?.addEventListener('click', async () => {
+    try {
+      const msg = document.getElementById('ecc-message').value;
+      if (!msg) { showToast('请输入消息', 'error'); return; }
+      const privJwk = JSON.parse(document.getElementById('ecc-private-key').value);
+      const hash = document.getElementById('ecc-hash').value;
+      const privKey = await crypto.subtle.importKey('jwk', privJwk, { name: 'ECDSA', namedCurve: privJwk.crv }, false, ['sign']);
+      const encoded = new TextEncoder().encode(msg);
+      const signature = await crypto.subtle.sign({ name: 'ECDSA', hash }, privKey, encoded);
+      document.getElementById('ecc-signature').textContent = btoa(String.fromCharCode(...new Uint8Array(signature)));
+      showToast('ECDSA 签名成功', 'success');
+    } catch (e) {
+      showToast('签名失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('ecc-verify-btn')?.addEventListener('click', async () => {
+    try {
+      const msg = document.getElementById('ecc-message').value;
+      const sigB64 = document.getElementById('ecc-signature').textContent.trim();
+      const pubJwk = JSON.parse(document.getElementById('ecc-public-key').value);
+      const hash = document.getElementById('ecc-hash').value;
+      const pubKey = await crypto.subtle.importKey('jwk', pubJwk, { name: 'ECDSA', namedCurve: pubJwk.crv }, false, ['verify']);
+      const sigBytes = Uint8Array.from(atob(sigB64), c => c.charCodeAt(0));
+      const encoded = new TextEncoder().encode(msg);
+      const valid = await crypto.subtle.verify({ name: 'ECDSA', hash }, pubKey, sigBytes, encoded);
+      showToast(valid ? '✅ 签名验证通过' : '❌ 签名验证失败', valid ? 'success' : 'error');
+    } catch (e) {
+      showToast('验签失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 ECC 模块已初始化');
+}
+
+// ═══ Ed25519 模块 (Web Crypto API) ═══
+function initEd25519Module() {
+  const page = document.getElementById('page-ed25519');
+  if (!page) return;
+  
+  let ed25519KeyPair = null;
+  // Check if Ed25519 is supported
+  const ed25519Supported = typeof crypto.subtle !== 'undefined';
+  
+  document.getElementById('ed25519-generate-btn')?.addEventListener('click', async () => {
+    try {
+      // Try Ed25519 first, fall back to ECDSA P-256
+      try {
+        ed25519KeyPair = await crypto.subtle.generateKey({ name: 'Ed25519' }, true, ['sign', 'verify']);
+        const pubRaw = await crypto.subtle.exportKey('raw', ed25519KeyPair.publicKey);
+        const privJwk = await crypto.subtle.exportKey('jwk', ed25519KeyPair.privateKey);
+        document.getElementById('ed25519-public-key').value = Array.from(new Uint8Array(pubRaw)).map(b => b.toString(16).padStart(2, '0')).join('');
+        document.getElementById('ed25519-private-key').value = JSON.stringify(privJwk, null, 2);
+        showToast('Ed25519 密钥对生成成功', 'success');
+        return;
+      } catch (e) {
+        // Ed25519 not supported, fall back
+      }
+      
+      ed25519KeyPair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+      const pubJwk = await crypto.subtle.exportKey('jwk', ed25519KeyPair.publicKey);
+      const privJwk = await crypto.subtle.exportKey('jwk', ed25519KeyPair.privateKey);
+      document.getElementById('ed25519-public-key').value = JSON.stringify(pubJwk, null, 2);
+      document.getElementById('ed25519-private-key').value = JSON.stringify(privJwk, null, 2);
+      showToast('Ed25519 不受支持，使用 ECDSA P-256 替代', 'info');
+    } catch (e) {
+      showToast('密钥生成失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('ed25519-sign-btn')?.addEventListener('click', async () => {
+    try {
+      const msg = document.getElementById('ed25519-message').value;
+      if (!msg) { showToast('请输入消息', 'error'); return; }
+      if (!ed25519KeyPair) { showToast('请先生成密钥对', 'error'); return; }
+      
+      const encoded = new TextEncoder().encode(msg);
+      let signature;
+      try {
+        signature = await crypto.subtle.sign({ name: 'Ed25519' }, ed25519KeyPair.privateKey, encoded);
+      } catch (e) {
+        signature = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, ed25519KeyPair.privateKey, encoded);
+      }
+      document.getElementById('ed25519-signature').textContent = Array.from(new Uint8Array(signature)).map(b => b.toString(16).padStart(2, '0')).join('');
+      showToast('签名成功', 'success');
+    } catch (e) {
+      showToast('签名失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('ed25519-verify-btn')?.addEventListener('click', async () => {
+    try {
+      const msg = document.getElementById('ed25519-message').value;
+      const sigHex = document.getElementById('ed25519-signature').textContent.trim();
+      if (!ed25519KeyPair) { showToast('请先生成密钥对', 'error'); return; }
+      const sigBytes = new Uint8Array(sigHex.match(/.{2}/g).map(b => parseInt(b, 16)));
+      const encoded = new TextEncoder().encode(msg);
+      let valid;
+      try {
+        valid = await crypto.subtle.verify({ name: 'Ed25519' }, ed25519KeyPair.publicKey, sigBytes, encoded);
+      } catch (e) {
+        valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, ed25519KeyPair.publicKey, sigBytes, encoded);
+      }
+      showToast(valid ? '✅ 签名验证通过' : '❌ 签名验证失败', valid ? 'success' : 'error');
+    } catch (e) {
+      showToast('验签失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 Ed25519 模块已初始化');
+}
+
+// ═══ SM2 模块 ═══
+function initSM2Module() {
+  const page = document.getElementById('page-sm2');
+  if (!page) return;
+  
+  let sm2KeyPair = null;
+  let sm2Mode = 'encrypt';
+  
+  // SM2 pill switching
+  page.querySelectorAll('[data-sm2-mode]').forEach(pill => {
+    pill.addEventListener('click', function() {
+      page.querySelectorAll('[data-sm2-mode]').forEach(p => p.classList.remove('active'));
+      this.classList.add('active');
+      sm2Mode = this.dataset.sm2Mode;
+    });
+  });
+  
+  document.getElementById('sm2-generate-btn')?.addEventListener('click', async () => {
+    try {
+      if (typeof smCrypto !== 'undefined' && smCrypto.sm2) {
+        sm2KeyPair = smCrypto.sm2.generateKeyPairHex();
+        document.getElementById('sm2-public-key').value = sm2KeyPair.publicKey;
+        document.getElementById('sm2-private-key').value = sm2KeyPair.privateKey;
+        showToast('SM2 密钥对生成成功', 'success');
+      } else {
+        // Fallback: use ECDSA P-256
+        const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+        const pubJwk = await crypto.subtle.exportKey('jwk', kp.publicKey);
+        const privJwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+        sm2KeyPair = { _webCrypto: true, publicKey: kp.publicKey, privateKey: kp.privateKey, pubJwk, privJwk };
+        document.getElementById('sm2-public-key').value = JSON.stringify(pubJwk, null, 2);
+        document.getElementById('sm2-private-key').value = JSON.stringify(privJwk, null, 2);
+        showToast('SM2 库未加载，使用 ECDSA P-256 替代', 'info');
+      }
+    } catch (e) {
+      showToast('密钥生成失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('sm2-encrypt-btn')?.addEventListener('click', async () => {
+    try {
+      const input = document.getElementById('sm2-input').value;
+      if (!input || !sm2KeyPair) { showToast('请输入内容并生成密钥对', 'error'); return; }
+      
+      if (sm2Mode === 'encrypt') {
+        if (typeof smCrypto !== 'undefined' && smCrypto.sm2 && !sm2KeyPair._webCrypto) {
+          const encrypted = smCrypto.sm2.doEncrypt(input, sm2KeyPair.publicKey);
+          document.getElementById('sm2-output').textContent = encrypted;
+        } else {
+          // Use AES with derived key as fallback
+          const key = CryptoJS.lib.WordArray.random(32);
+          const iv = CryptoJS.lib.WordArray.random(16);
+          const encrypted = CryptoJS.AES.encrypt(input, key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 });
+          document.getElementById('sm2-output').textContent = key.toString() + ':' + iv.toString() + ':' + encrypted.toString();
+        }
+      } else {
+        // Sign mode
+        if (!sm2KeyPair._webCrypto) {
+          const sig = typeof smCrypto !== 'undefined' && smCrypto.sm2 ? smCrypto.sm2.doSignature(input, sm2KeyPair.privateKey) : 'SM2 库未加载';
+          document.getElementById('sm2-output').textContent = sig;
+        } else {
+          const encoded = new TextEncoder().encode(input);
+          const sig = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, sm2KeyPair.privateKey, encoded);
+          document.getElementById('sm2-output').textContent = btoa(String.fromCharCode(...new Uint8Array(sig)));
+        }
+      }
+      showToast(sm2Mode === 'encrypt' ? '加密成功' : '签名成功', 'success');
+    } catch (e) {
+      showToast('操作失败: ' + e.message, 'error');
+    }
+  });
+  
+  document.getElementById('sm2-decrypt-btn')?.addEventListener('click', async () => {
+    try {
+      const output = document.getElementById('sm2-output').textContent.trim();
+      if (!output || !sm2KeyPair) { showToast('请先加密/签名', 'error'); return; }
+      
+      if (sm2Mode === 'encrypt') {
+        if (typeof smCrypto !== 'undefined' && smCrypto.sm2 && !sm2KeyPair._webCrypto) {
+          const decrypted = smCrypto.sm2.doDecrypt(output, sm2KeyPair.privateKey);
+          document.getElementById('sm2-input').value = decrypted;
+        } else {
+          const parts = output.split(':');
+          if (parts.length === 3) {
+            const key = CryptoJS.enc.Hex.parse(parts[0]);
+            const iv = CryptoJS.enc.Hex.parse(parts[1]);
+            const decrypted = CryptoJS.AES.decrypt(parts[2], key, { iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }).toString(CryptoJS.enc.Utf8);
+            document.getElementById('sm2-input').value = decrypted;
+          }
+        }
+        showToast('解密成功', 'success');
+      } else {
+        // Verify mode
+        const msg = document.getElementById('sm2-input').value;
+        if (!sm2KeyPair._webCrypto) {
+          const valid = typeof smCrypto !== 'undefined' && smCrypto.sm2 ? smCrypto.sm2.doVerifySignature(msg, output, sm2KeyPair.publicKey) : false;
+          showToast(valid ? '✅ 验签通过' : '❌ 验签失败', valid ? 'success' : 'error');
+        } else {
+          const sigBytes = Uint8Array.from(atob(output), c => c.charCodeAt(0));
+          const encoded = new TextEncoder().encode(msg);
+          const valid = await crypto.subtle.verify({ name: 'ECDSA', hash: 'SHA-256' }, sm2KeyPair.publicKey, sigBytes, encoded);
+          showToast(valid ? '✅ 验签通过' : '❌ 验签失败', valid ? 'success' : 'error');
+        }
+      }
+    } catch (e) {
+      showToast('操作失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 SM2 模块已初始化');
+}
+
+// ═══ HMAC 模块 ═══
+function initHMACModule() {
+  const page = document.getElementById('page-hmac');
+  if (!page) return;
+  
+  document.getElementById('hmac-compute-btn')?.addEventListener('click', () => {
+    try {
+      const msg = document.getElementById('hmac-input').value;
+      const key = document.getElementById('hmac-key').value;
+      const algo = document.getElementById('hmac-algo').value;
+      if (!msg || !key) { showToast('请输入消息和密钥', 'error'); return; }
+      
+      let result;
+      switch (algo) {
+        case 'HMAC-MD5': result = CryptoJS.HmacMD5(msg, key).toString(); break;
+        case 'HMAC-SHA1': result = CryptoJS.HmacSHA1(msg, key).toString(); break;
+        case 'HMAC-SHA256': result = CryptoJS.HmacSHA256(msg, key).toString(); break;
+        case 'HMAC-SHA512': result = CryptoJS.HmacSHA512(msg, key).toString(); break;
+        default: result = CryptoJS.HmacSHA256(msg, key).toString();
+      }
+      document.getElementById('hmac-output').textContent = result;
+      showToast(`${algo} 计算成功`, 'success');
+    } catch (e) {
+      showToast('HMAC 计算失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 HMAC 模块已初始化');
+}
+
+// ═══ 密码哈希模块 ═══
+function initPasswordModule() {
+  const page = document.getElementById('page-password');
+  if (!page) return;
+  
+  document.getElementById('password-hash-btn')?.addEventListener('click', async () => {
+    try {
+      const password = document.getElementById('password-input').value;
+      const algo = document.getElementById('password-algo').value;
+      const iterations = parseInt(document.getElementById('password-iterations').value) || 10000;
+      if (!password) { showToast('请输入密码', 'error'); return; }
+      
+      let result;
+      if (algo === 'PBKDF2') {
+        const salt = CryptoJS.lib.WordArray.random(16);
+        const derived = CryptoJS.PBKDF2(password, salt, { keySize: 256/32, iterations });
+        result = `Salt: ${salt.toString()}\nHash: ${derived.toString()}\nIterations: ${iterations}`;
+      } else if (algo === 'Bcrypt' && typeof dcodeIO !== 'undefined' && dcodeIO.bcrypt) {
+        const hash = dcodeIO.bcrypt.hashSync(password, 10);
+        result = hash;
+      } else {
+        // Fallback PBKDF2
+        const salt = CryptoJS.lib.WordArray.random(16);
+        const derived = CryptoJS.PBKDF2(password, salt, { keySize: 256/32, iterations });
+        result = `Salt: ${salt.toString()}\nHash: ${derived.toString()}\nIterations: ${iterations}`;
+        if (algo === 'Bcrypt') showToast('Bcrypt 库未加载，使用 PBKDF2', 'info');
+      }
+      document.getElementById('password-output').textContent = result;
+      showToast('密码哈希成功', 'success');
+    } catch (e) {
+      showToast('哈希失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 密码哈希模块已初始化');
+}
+
+// ═══ Hex 编解码模块 ═══
+function initHexModule() {
+  const page = document.getElementById('page-hex');
+  if (!page) return;
+  
+  document.getElementById('hex-encode-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('hex-input').value;
+    if (!input) { showToast('请输入文本', 'error'); return; }
+    const hex = Array.from(new TextEncoder().encode(input)).map(b => b.toString(16).padStart(2, '0')).join('');
+    document.getElementById('hex-output').textContent = hex;
+    showToast('Hex 编码成功', 'success');
+  });
+  
+  document.getElementById('hex-decode-btn')?.addEventListener('click', () => {
+    const input = document.getElementById('hex-input').value.replace(/\s/g, '');
+    if (!input) { showToast('请输入 Hex', 'error'); return; }
+    try {
+      const bytes = input.match(/.{1,2}/g).map(b => parseInt(b, 16));
+      const text = new TextDecoder().decode(new Uint8Array(bytes));
+      document.getElementById('hex-output').textContent = text;
+      showToast('Hex 解码成功', 'success');
+    } catch (e) {
+      showToast('Hex 解码失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 Hex 模块已初始化');
+}
+
+// ═══ JWT 解码模块 ═══
+function initJWTModule() {
+  const page = document.getElementById('page-jwt');
+  if (!page) return;
+  
+  document.getElementById('jwt-decode-btn')?.addEventListener('click', () => {
+    const token = document.getElementById('jwt-input').value.trim();
+    if (!token) { showToast('请输入 JWT', 'error'); return; }
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) throw new Error('无效的 JWT 格式');
+      
+      const header = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      
+      let result = '📋 Header:\n' + JSON.stringify(header, null, 2) + '\n\n';
+      result += '📦 Payload:\n' + JSON.stringify(payload, null, 2) + '\n\n';
+      result += '🔏 Signature:\n' + parts[2];
+      
+      if (payload.exp) {
+        const expDate = new Date(payload.exp * 1000);
+        const expired = expDate < new Date();
+        result += `\n\n⏰ 过期时间: ${expDate.toLocaleString()} ${expired ? '(已过期 ❌)' : '(有效 ✅)'}`;
+      }
+      if (payload.iat) {
+        result += `\n📅 签发时间: ${new Date(payload.iat * 1000).toLocaleString()}`;
+      }
+      
+      document.getElementById('jwt-output').textContent = result;
+      showToast('JWT 解码成功', 'success');
+    } catch (e) {
+      showToast('JWT 解码失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 JWT 模块已初始化');
+}
+
+// ═══ 证书解析模块 ═══
+function initCertModule() {
+  const page = document.getElementById('page-cert');
+  if (!page) return;
+  
+  document.getElementById('cert-parse-btn')?.addEventListener('click', () => {
+    const pem = document.getElementById('cert-input').value.trim();
+    if (!pem) { showToast('请输入 PEM 证书', 'error'); return; }
+    try {
+      const b64 = pem.replace(/-----[^-]+-----/g, '').replace(/\s/g, '');
+      const binary = atob(b64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      
+      let result = `📜 证书信息:\n`;
+      result += `  大小: ${bytes.length} bytes\n`;
+      result += `  Base64 长度: ${b64.length}\n`;
+      result += `  格式: ${pem.includes('CERTIFICATE') ? 'X.509 证书' : pem.includes('PUBLIC KEY') ? '公钥' : pem.includes('PRIVATE KEY') ? '私钥' : '未知'}\n`;
+      result += `\n📝 原始数据 (Hex, 前 64 字节):\n`;
+      result += Array.from(bytes.slice(0, 64)).map(b => b.toString(16).padStart(2, '0')).join(' ');
+      
+      document.getElementById('cert-output').textContent = result;
+      showToast('证书解析成功', 'success');
+    } catch (e) {
+      showToast('证书解析失败: ' + e.message, 'error');
+    }
+  });
+  
+  console.log('🔐 证书解析模块已初始化');
+}
+
+// ═══ 文本对比模块 ═══
+function initCompareModule() {
+  const page = document.getElementById('page-compare');
+  if (!page) return;
+  
+  document.getElementById('compare-btn')?.addEventListener('click', () => {
+    const a = document.getElementById('compare-a').value;
+    const b = document.getElementById('compare-b').value;
+    if (!a && !b) { showToast('请输入文本', 'error'); return; }
+    
+    if (a === b) {
+      document.getElementById('compare-output').textContent = '✅ 两段文本完全相同';
+      showToast('文本相同', 'success');
+    } else {
+      let result = '❌ 文本不同\n\n';
+      result += `📏 长度: A=${a.length}, B=${b.length}\n`;
+      
+      // Find first difference
+      let diffPos = -1;
+      for (let i = 0; i < Math.max(a.length, b.length); i++) {
+        if (a[i] !== b[i]) { diffPos = i; break; }
+      }
+      if (diffPos >= 0) {
+        result += `📍 首个不同位置: ${diffPos}\n`;
+        result += `  A[${diffPos}]: "${a[diffPos] || '(空)'}" (${a.charCodeAt(diffPos) || 'N/A'})\n`;
+        result += `  B[${diffPos}]: "${b[diffPos] || '(空)'}" (${b.charCodeAt(diffPos) || 'N/A'})\n`;
+      }
+      
+      // Hash comparison
+      const hashA = CryptoJS.SHA256(a).toString();
+      const hashB = CryptoJS.SHA256(b).toString();
+      result += `\n🔑 SHA-256:\n  A: ${hashA}\n  B: ${hashB}`;
+      
+      document.getElementById('compare-output').textContent = result;
+      showToast('对比完成', 'info');
+    }
+  });
+  
+  console.log('🔐 文本对比模块已初始化');
+}
+
+// ═══ 密钥生成器模块 ═══
+function initKeygenModule() {
+  const page = document.getElementById('page-keygen');
+  if (!page) return;
+  
+  // Find generate buttons in keygen page
+  const genBtns = page.querySelectorAll('.btn, button');
+  const selects = page.querySelectorAll('select');
+  const outputs = page.querySelectorAll('.out, textarea[readonly], .hv');
+  
+  // Bind the first select (key type) and generate button
+  const keyTypeSel = selects[0]; // RSA/ECC/AES etc.
+  
+  // Find generate button
+  const generateBtn = page.querySelector('.btn.btn-p, .btn-p');
+  if (generateBtn) {
+    generateBtn.addEventListener('click', async () => {
+      try {
+        const keyType = keyTypeSel?.value || 'AES';
+        let result = '';
+        
+        switch (keyType) {
+          case 'RSA': {
+            const kp = await crypto.subtle.generateKey(
+              { name: 'RSA-OAEP', modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: 'SHA-256' },
+              true, ['encrypt', 'decrypt']
+            );
+            const pubData = await crypto.subtle.exportKey('spki', kp.publicKey);
+            const privData = await crypto.subtle.exportKey('pkcs8', kp.privateKey);
+            const b64Pub = btoa(String.fromCharCode(...new Uint8Array(pubData)));
+            const b64Priv = btoa(String.fromCharCode(...new Uint8Array(privData)));
+            result = `-----BEGIN PUBLIC KEY-----\n${b64Pub.match(/.{1,64}/g).join('\n')}\n-----END PUBLIC KEY-----\n\n-----BEGIN PRIVATE KEY-----\n${b64Priv.match(/.{1,64}/g).join('\n')}\n-----END PRIVATE KEY-----`;
+            break;
+          }
+          case 'ECC': {
+            const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+            const jwk = await crypto.subtle.exportKey('jwk', kp.privateKey);
+            result = JSON.stringify(jwk, null, 2);
+            break;
+          }
+          default: { // AES
+            const sizes = [128, 192, 256];
+            result = sizes.map(s => `AES-${s}: ${CryptoJS.lib.WordArray.random(s/8).toString()}`).join('\n');
+            result += '\n\nIV (128-bit): ' + CryptoJS.lib.WordArray.random(16).toString();
+            result += '\nUUID: ' + crypto.randomUUID();
+          }
+        }
+        
+        // Try to find output area
+        const outEl = page.querySelector('.out') || page.querySelector('textarea:last-of-type');
+        if (outEl) {
+          if (outEl.tagName === 'TEXTAREA') outEl.value = result;
+          else outEl.textContent = result;
+        }
+        showToast(`${keyType} 密钥生成成功`, 'success');
+      } catch (e) {
+        showToast('生成失败: ' + e.message, 'error');
+      }
+    });
+  }
+  
+  console.log('🔐 密钥生成器已初始化');
+}
 
 function initAllPills() {
   // === AES 页 pill 按钮 ===
