@@ -49,9 +49,9 @@ function copyOutput() {
 </script>
 
 <template>
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
     <!-- Input -->
-    <div class="border border-[var(--border)] rounded-md bg-[var(--bg-1)] overflow-hidden">
+    <div class="border border-[var(--border)] rounded-md bg-[var(--bg-1)] overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] text-[12px]">
         <span class="text-[var(--text-2)] flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
@@ -66,7 +66,7 @@ function copyOutput() {
         :value="inputValue"
         @input="$emit('update:inputValue', $event.target.value)"
         :placeholder="inputPlaceholder"
-        class="!border-none !rounded-none !bg-transparent p-3"
+        class="!border-none !rounded-none !bg-transparent p-3 flex-1 !min-h-[200px]"
       />
       <div class="flex items-center gap-2 px-3 py-1.5 border-t border-[var(--border)] text-[11px] text-[var(--text-3)]">
         <span
@@ -79,7 +79,7 @@ function copyOutput() {
     </div>
 
     <!-- Output -->
-    <div class="border border-[var(--border)] rounded-md bg-[var(--bg-1)] overflow-hidden">
+    <div class="border border-[var(--border)] rounded-md bg-[var(--bg-1)] overflow-hidden flex flex-col">
       <div class="flex items-center justify-between px-3 py-2 border-b border-[var(--border)] text-[12px]">
         <span class="text-[var(--text-2)] flex items-center gap-1.5">
           <span class="w-1.5 h-1.5 rounded-full bg-[var(--accent)]"></span>
@@ -90,7 +90,7 @@ function copyOutput() {
           <button class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors" @click="$emit('save')">保存</button>
         </div>
       </div>
-      <div class="p-3 min-h-[160px] mono text-[13px] whitespace-pre-wrap break-all" :class="outputValue ? 'text-[var(--text)]' : 'text-[var(--accent)] opacity-60'">
+      <div class="p-3 flex-1 min-h-[200px] mono text-[13px] whitespace-pre-wrap break-all overflow-auto" :class="outputValue ? 'text-[var(--text)]' : 'text-[var(--accent)] opacity-60'">
         {{ outputValue || outputPlaceholder }}
       </div>
       <div v-if="outputMeta" class="px-3 py-1.5 border-t border-[var(--border)] text-[11px] text-[var(--text-3)]">
