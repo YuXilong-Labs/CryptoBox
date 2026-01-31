@@ -1,8 +1,9 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
+import { useHistory } from '../composables/useHistory.js'
 
 const algos = ['HMAC-MD5', 'HMAC-SHA1', 'HMAC-SHA256', 'HMAC-SHA512']
 const selected = ref('HMAC-SHA256')
@@ -10,7 +11,9 @@ const input = ref('')
 const key = ref('')
 const output = ref('')
 const outputFmt = ref('hex')
+const { save: saveHistory, getLast: getLastInput } = useHistory('hmac')
 
+onMounted(() => { input.value = getLastInput() })
 function compute() {
   if (!input.value || !key.value) { output.value = ''; return }
   const map = { 'HMAC-MD5': CryptoJS.HmacMD5, 'HMAC-SHA1': CryptoJS.HmacSHA1, 'HMAC-SHA256': CryptoJS.HmacSHA256, 'HMAC-SHA512': CryptoJS.HmacSHA512 }

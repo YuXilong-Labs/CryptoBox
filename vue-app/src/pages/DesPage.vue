@@ -1,11 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
+import { useHistory } from '../composables/useHistory.js'
 
 const modes = ['DES-CBC', 'DES-ECB', '3DES-CBC', '3DES-ECB']
+const { save: saveHistory, getLast: getLastInput } = useHistory('des')
 const selectedMode = ref('DES-CBC')
 
 const algo = computed(() => selectedMode.value.startsWith('3') ? 'TripleDES' : 'DES')
@@ -19,6 +21,7 @@ const input = ref('')
 const output = ref('')
 const elapsed = ref(0)
 
+onMounted(() => { input.value = getLastInput() })
 const needsIV = computed(() => modeStr.value !== 'ECB')
 
 function randomHex(n) {
@@ -43,7 +46,7 @@ function run(decrypt = false) {
       const r = fn.encrypt(input.value, k, cfg)
       output.value = outputFmt.value === 'Base64' ? r.toString() : r.ciphertext.toString(CryptoJS.enc.Hex)
     }
-    elapsed.value = Math.round(performance.now() - t0)
+    elapsed.value = Math.round(performance.now() - t0); saveHistory(input.value)
   } catch (e) { output.value = `错误: ${e.message}` }
 }
 

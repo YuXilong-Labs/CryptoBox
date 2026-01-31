@@ -1,8 +1,9 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const modes = ['加密/解密', '签名/验签']
 const selected = ref('加密/解密')
@@ -11,6 +12,9 @@ const keys = reactive({ publicKey: '', privateKey: '' })
 const input = ref('')
 const output = ref('')
 const generating = ref(false)
+const { save: saveHistory, getLast: getLastInput } = useHistory('rsa')
+onMounted(() => { input.value = getLastInput() })
+
 
 async function generateKeys() {
   generating.value = true

@@ -1,6 +1,7 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 // SM2 uses P-256 curve as approximation via Web Crypto (real SM2 uses a different curve)
 const publicKey = ref('')
@@ -9,6 +10,9 @@ const input = ref('')
 const signature = ref('')
 const verifyResult = ref('')
 const generating = ref(false)
+const { save: saveHistory, getLast: getLastInput } = useHistory('sm2')
+onMounted(() => { input.value = getLastInput() })
+
 
 async function generateKeys() {
   generating.value = true

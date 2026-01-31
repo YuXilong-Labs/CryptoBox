@@ -1,11 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const modes = ['Hex 编码', 'Hex 解码', 'URL 编码', 'URL 解码', 'Unicode 编码', 'Unicode 解码']
 const selected = ref('Hex 编码')
+const { save: saveHistory, getLast: getLastInput } = useHistory('hexurl')
 const input = ref('')
+onMounted(() => { input.value = getLastInput() })
 const output = ref('')
 
 function run() {

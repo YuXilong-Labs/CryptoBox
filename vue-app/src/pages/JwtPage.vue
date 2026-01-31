@@ -1,12 +1,16 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const token = ref('')
 const header = ref('')
 const payload = ref('')
 const signature = ref('')
 const error = ref('')
+const { save: saveHistory, getLast: getLastInput } = useHistory('jwt')
+onMounted(() => { token.value = getLastInput() })
+
 
 function decode() {
   error.value = ''

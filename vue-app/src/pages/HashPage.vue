@@ -1,10 +1,12 @@
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
+import { useHistory } from '../composables/useHistory.js'
 
 const input = ref('')
 const outputFmt = ref('hex')
+const { save: saveHistory, getLast: getLastInput } = useHistory('hash')
 
 const algos = [
   { name: 'MD5', fn: (t) => CryptoJS.MD5(t) },
@@ -16,6 +18,7 @@ const algos = [
   { name: 'RIPEMD-160', fn: (t) => CryptoJS.RIPEMD160(t) },
 ]
 
+onMounted(() => { input.value = getLastInput() })
 const results = ref(algos.map(a => ({ name: a.name, value: '' })))
 
 function compute() {

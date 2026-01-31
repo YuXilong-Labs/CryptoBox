@@ -1,13 +1,17 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const key = ref('')
 const nonce = ref('')
 const input = ref('')
 const output = ref('')
 const elapsed = ref(0)
+const { save: saveHistory, getLast: getLastInput } = useHistory('chacha20')
+onMounted(() => { input.value = getLastInput() })
+
 
 function randomHex(n) {
   return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b => b.toString(16).padStart(2,'0')).join('')

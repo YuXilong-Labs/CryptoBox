@@ -1,7 +1,8 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const modes = ['PBKDF2', 'SHA-256 x N']
 const selected = ref('PBKDF2')
@@ -10,6 +11,9 @@ const salt = ref('')
 const iterations = ref('100000')
 const output = ref('')
 const computing = ref(false)
+const { save: saveHistory, getLast: getLastInput } = useHistory('passhash')
+onMounted(() => { password.value = getLastInput() })
+
 
 function randomHex(n) { return Array.from(crypto.getRandomValues(new Uint8Array(n))).map(b=>b.toString(16).padStart(2,'0')).join('') }
 

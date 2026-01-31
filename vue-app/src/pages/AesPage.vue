@@ -1,12 +1,16 @@
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import CryptoJS from 'crypto-js'
+import { useHistory } from '../composables/useHistory.js'
+
 
 // Mode pills
 const modes = ['AES-128-CBC', 'AES-256-CBC', 'AES-128-ECB', 'AES-256-ECB', 'AES-128-CTR', 'AES-256-CTR', 'AES-128-GCM', 'AES-256-GCM']
+const { save: saveHistory, getLast: getLastInput } = useHistory('aes')
+
 const selectedMode = ref('AES-128-CBC')
 
 // Config
@@ -30,6 +34,8 @@ watch(selectedMode, (v) => {
 watch([keySize, mode], () => {
   selectedMode.value = `AES-${keySize.value}-${mode.value}`
 })
+
+onMounted(() => { input.value = getLastInput() })
 
 const needsIV = computed(() => mode.value !== 'ECB')
 
@@ -58,6 +64,7 @@ function encrypt() {
       ? encrypted.toString()
       : encrypted.ciphertext.toString(CryptoJS.enc.Hex)
     elapsed.value = Math.round(performance.now() - t0)
+    saveHistory(input.value)
   } catch (e) {
     output.value = `错误: ${e.message}`
   }

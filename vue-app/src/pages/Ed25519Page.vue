@@ -1,6 +1,7 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const keys = reactive({ publicKey: '', privateKey: '' })
 const input = ref('')
@@ -8,6 +9,9 @@ const signature = ref('')
 const verifyResult = ref('')
 const generating = ref(false)
 const error = ref('')
+const { save: saveHistory, getLast: getLastInput } = useHistory('ed25519')
+onMounted(() => { input.value = getLastInput() })
+
 
 async function generateKeys() {
   generating.value = true; error.value = ''

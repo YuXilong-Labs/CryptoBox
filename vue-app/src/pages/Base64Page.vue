@@ -1,11 +1,14 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import IOPanel from '../components/IOPanel.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const modes = ['Base64 编码', 'Base64 解码', 'Base32 编码', 'Base32 解码']
 const selected = ref('Base64 编码')
+const { save: saveHistory, getLast: getLastInput } = useHistory('base64')
 const input = ref('')
+onMounted(() => { input.value = getLastInput() })
 const output = ref('')
 
 const b32chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'
@@ -35,6 +38,7 @@ function run() {
       case 'Base32 编码': output.value = b32encode(input.value); break
       case 'Base32 解码': output.value = b32decode(input.value); break
     }
+  saveHistory(input.value)
   } catch (e) { output.value = `错误: ${e.message}` }
 }
 </script>

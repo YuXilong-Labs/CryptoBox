@@ -1,7 +1,8 @@
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
+import { useHistory } from '../composables/useHistory.js'
 
 const curves = ['P-256', 'P-384', 'P-521']
 const selectedCurve = ref('P-256')
@@ -10,6 +11,9 @@ const input = ref('')
 const signature = ref('')
 const verifyResult = ref('')
 const generating = ref(false)
+const { save: saveHistory, getLast: getLastInput } = useHistory('ecc')
+onMounted(() => { input.value = getLastInput() })
+
 
 async function generateKeys() {
   generating.value = true

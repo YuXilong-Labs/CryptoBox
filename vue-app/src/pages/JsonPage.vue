@@ -1,9 +1,12 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import JsonTree from '../components/JsonTree.vue'
 import CodeEditor from '../components/CodeEditor.vue'
+import { useHistory } from '../composables/useHistory.js'
+
+const { save, getLast } = useHistory('json')
 
 const modes = ['格式化', '压缩', '校验', '转义', '去转义']
 const selected = ref('格式化')
@@ -11,6 +14,8 @@ const input = ref('')
 const output = ref('')
 const error = ref('')
 const treeData = ref(null)
+
+onMounted(() => { input.value = getLast() })
 
 function run() {
   error.value = ''
@@ -32,6 +37,7 @@ function run() {
       }
       case '去转义': output.value = JSON.parse(input.value); break
     }
+    save(input.value)
   } catch (e) { error.value = e.message; output.value = '' }
 }
 
