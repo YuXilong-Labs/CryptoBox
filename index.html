@@ -4538,8 +4538,155 @@ document.addEventListener('DOMContentLoaded', function() {
     showToast('欢迎使用 CryptoBox！', 'info', 2000);
   }, 500);
   
+  // 初始化所有 pill 按钮交互
+  initAllPills();
+  
   console.log('✅ CryptoBox 应用初始化完成');
 });
+
+function initAllPills() {
+  // === AES 页 pill 按钮 ===
+  const aesPage = document.getElementById('page-aes');
+  if (aesPage) {
+    const aesPills = aesPage.querySelectorAll('.pills:first-of-type .pill');
+    const aesSelects = aesPage.querySelectorAll('.cfg select');
+    
+    aesPills.forEach(pill => {
+      pill.style.cursor = 'pointer';
+      pill.addEventListener('click', function() {
+        // 移除所有 active
+        aesPills.forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        
+        // 解析 pill 文字，如 "AES-256-ECB"
+        const text = this.textContent.trim();
+        const match = text.match(/AES-(\d+)-(\w+)/);
+        if (match && aesSelects.length >= 2) {
+          const keySize = match[1]; // 128 或 256
+          const mode = match[2]; // CBC/ECB/CTR/GCM
+          
+          // 同步密钥长度下拉框
+          const keySel = aesSelects[0];
+          for (let opt of keySel.options) {
+            if (opt.text.includes(keySize)) { keySel.value = opt.value; break; }
+          }
+          // 同步模式下拉框
+          const modeSel = aesSelects[1];
+          for (let opt of modeSel.options) {
+            if (opt.text === mode || opt.value === mode) { modeSel.value = opt.value; break; }
+          }
+        }
+      });
+    });
+    
+    // 下拉框变化时同步 pill 高亮
+    if (aesSelects.length >= 2) {
+      const syncAesPill = () => {
+        const keySize = aesSelects[0].selectedOptions[0]?.text.match(/\d+/)?.[0] || '256';
+        const mode = aesSelects[1].value;
+        const target = 'AES-' + keySize + '-' + mode;
+        aesPills.forEach(p => {
+          p.classList.toggle('active', p.textContent.trim() === target);
+        });
+      };
+      aesSelects[0].addEventListener('change', syncAesPill);
+      aesSelects[1].addEventListener('change', syncAesPill);
+    }
+  }
+
+  // === DES 页 pill 按钮 ===
+  const desPage = document.getElementById('page-des');
+  if (desPage) {
+    const desPills = desPage.querySelectorAll('.pills .pill');
+    desPills.forEach(pill => {
+      pill.style.cursor = 'pointer';
+      pill.addEventListener('click', function() {
+        desPills.forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        // 同步 DES 下拉框
+        const text = this.textContent.trim();
+        const selects = desPage.querySelectorAll('.cfg select');
+        if (selects.length >= 2) {
+          const is3DES = text.startsWith('3DES');
+          const mode = text.includes('ECB') ? 'ECB' : 'CBC';
+          // 算法下拉
+          for (let opt of selects[0].options) {
+            if ((is3DES && opt.text.includes('3DES')) || (!is3DES && opt.text === 'DES')) {
+              selects[0].value = opt.value; break;
+            }
+          }
+          // 模式下拉
+          for (let opt of selects[1].options) {
+            if (opt.text === mode || opt.value === mode) { selects[1].value = opt.value; break; }
+          }
+        }
+      });
+    });
+  }
+
+  // === RSA 页 pill 按钮 ===
+  const rsaPage = document.getElementById('page-rsa');
+  if (rsaPage) {
+    const rsaPills = rsaPage.querySelectorAll('.pills .pill[data-rsa-mode]');
+    rsaPills.forEach(pill => {
+      pill.style.cursor = 'pointer';
+      pill.addEventListener('click', function() {
+        rsaPills.forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        // 切换加解密/签名验签面板
+        const mode = this.dataset.rsaMode;
+        const encPanel = rsaPage.querySelector('.rsa-encrypt-panel, [id*="rsa-enc"]');
+        const signPanel = rsaPage.querySelector('.rsa-sign-panel, [id*="rsa-sign"]');
+        if (encPanel && signPanel) {
+          encPanel.style.display = mode === 'encrypt' ? '' : 'none';
+          signPanel.style.display = mode === 'sign' ? '' : 'none';
+        }
+      });
+    });
+  }
+
+  // === Base64 页 pill 按钮 ===
+  const base64Page = document.getElementById('page-base64');
+  if (base64Page) {
+    const b64Pills = base64Page.querySelectorAll('.pills .pill');
+    b64Pills.forEach(pill => {
+      pill.style.cursor = 'pointer';
+      pill.addEventListener('click', function() {
+        b64Pills.forEach(p => p.classList.remove('active'));
+        this.classList.add('active');
+        // 同步编码类型下拉框
+        const text = this.textContent.trim();
+        const sel = base64Page.querySelector('select');
+        if (sel) {
+          for (let opt of sel.options) {
+            if (opt.text === text || opt.value === text) { sel.value = opt.value; break; }
+          }
+        }
+      });
+    });
+  }
+
+  // === 通用 pill 处理：任何带 .pills 的容器中未绑定的 pill ===
+  document.querySelectorAll('.pills').forEach(container => {
+    const pills = container.querySelectorAll('.pill');
+    // 跳过已处理的（AES/DES/RSA/Base64/JSON jtab）
+    if (pills[0]?.dataset.jtab || pills[0]?.dataset.rsaMode) return;
+    if (container.closest('#page-aes') || container.closest('#page-des') || 
+        container.closest('#page-base64')) return;
+    
+    pills.forEach(pill => {
+      pill.style.cursor = 'pointer';
+      // 如果还没有 click listener（通用 active 切换）
+      if (!pill._pillBound) {
+        pill._pillBound = true;
+        pill.addEventListener('click', function() {
+          pills.forEach(p => p.classList.remove('active'));
+          this.classList.add('active');
+        });
+      }
+    });
+  });
+}
 
 // 防止右键菜单和开发者工具（可选）
 // document.addEventListener('contextmenu', e => e.preventDefault());
