@@ -400,6 +400,27 @@ body::before {
   z-index: 50;
 }
 
+.menu-btn {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 8px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.menu-btn:hover {
+  background: var(--card-bg);
+  color: var(--green);
+}
+
 .bc {
   display: flex;
   align-items: center;
@@ -1776,13 +1797,38 @@ body::before {
 }
 
 @media (max-width: 1024px) {
+  .menu-btn {
+    display: flex !important;
+  }
+  
   .sidebar {
     transform: translateX(-100%);
     transition: transform 0.3s ease;
+    z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
   }
   
   .sidebar.show {
     transform: translateX(0);
+  }
+  
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
+  }
+  
+  .sidebar-overlay.show {
+    display: block;
   }
   
   .main {
@@ -1809,7 +1855,11 @@ body::before {
 
 @media (max-width: 768px) {
   .content {
-    padding: 24px 16px;
+    padding: 20px 12px;
+  }
+  
+  .topbar {
+    padding: 0 12px;
   }
   
   .cat-grid {
@@ -1817,12 +1867,13 @@ body::before {
   }
   
   .page-h h2 {
-    font-size: 24px;
+    font-size: 22px;
   }
   
   .page-h p {
     margin-left: 0;
     margin-top: 8px;
+    font-size: 13px;
   }
   
   .cfg {
@@ -1831,6 +1882,49 @@ body::before {
   
   .hg {
     grid-template-columns: 1fr;
+  }
+  
+  .pills {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .pill {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+  
+  .ab {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .ab .btn {
+    flex: 1;
+    min-width: 100px;
+  }
+  
+  textarea {
+    min-height: 120px;
+    font-size: 13px;
+  }
+  
+  .ws {
+    padding: 16px 12px;
+  }
+  
+  .tb-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+  
+  .bc span:first-child {
+    display: none;
+  }
+  
+  .bc .sep {
+    display: none;
   }
 }
 
@@ -2068,6 +2162,7 @@ h3,
 <div class="toast-container" id="toast-container"></div>
 
 <div class="app">
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
 <aside class="sidebar">
   <div class="sb-header">
     <div class="sb-logo">
@@ -2335,6 +2430,13 @@ h3,
 
 <main class="main">
   <header class="topbar">
+    <button class="menu-btn" id="menu-toggle" aria-label="菜单">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
     <div class="bc">
       <span>CryptoBox</span>
       <span class="sep">/</span>
@@ -4736,6 +4838,33 @@ document.addEventListener('DOMContentLoaded', function() {
   setTimeout(() => {
     showToast('欢迎使用 CryptoBox！', 'info', 2000);
   }, 500);
+  
+  // 移动端菜单 toggle
+  const menuToggle = document.getElementById('menu-toggle');
+  const sidebar = document.querySelector('.sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  
+  if (menuToggle && sidebar) {
+    menuToggle.addEventListener('click', () => {
+      sidebar.classList.toggle('show');
+      sidebarOverlay.classList.toggle('show');
+    });
+    
+    sidebarOverlay.addEventListener('click', () => {
+      sidebar.classList.remove('show');
+      sidebarOverlay.classList.remove('show');
+    });
+    
+    // 点击侧边栏导航项后自动关闭
+    sidebar.querySelectorAll('[data-page]').forEach(item => {
+      item.addEventListener('click', () => {
+        if (window.innerWidth <= 1024) {
+          sidebar.classList.remove('show');
+          sidebarOverlay.classList.remove('show');
+        }
+      });
+    });
+  }
   
   // 初始化所有 pill 按钮交互
   initAllPills();
