@@ -60,7 +60,7 @@ const showTree = computed(() => selected.value === '格式化' && treeData.value
           <CopyBtn :value="output" />
         </label>
         <!-- Tree view for 格式化 -->
-        <div v-if="showTree" class="border border-[var(--border)] rounded bg-[var(--bg)] p-3 min-h-[480px] max-h-[700px] overflow-auto mono text-[12px] leading-[1.7]">
+        <div v-if="showTree" class="border border-[var(--border)] rounded bg-[var(--bg)] p-4 min-h-[480px] max-h-[700px] overflow-auto mono text-[13px] leading-[1.8]">
           <JsonTree :data="treeData" :root="true" />
         </div>
         <!-- Text output for others -->
