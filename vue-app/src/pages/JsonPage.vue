@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import PillGroup from '../components/PillGroup.vue'
 import CopyBtn from '../components/CopyBtn.vue'
 import JsonTree from '../components/JsonTree.vue'
+import CodeEditor from '../components/CodeEditor.vue'
 
 const modes = ['格式化', '压缩', '校验', '转义', '去转义']
 const selected = ref('格式化')
@@ -52,7 +53,7 @@ const showTree = computed(() => selected.value === '格式化' && treeData.value
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
       <div class="flex flex-col gap-1">
         <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">输入</label>
-        <textarea v-model="input" placeholder='{"key": "value"}' class="!min-h-[480px] !text-[12px]" />
+        <CodeEditor v-model="input" placeholder='{"key": "value"}' minHeight="480px" />
       </div>
       <div class="flex flex-col gap-1">
         <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">
@@ -63,8 +64,8 @@ const showTree = computed(() => selected.value === '格式化' && treeData.value
         <div v-if="showTree" class="border border-[var(--border)] rounded bg-[var(--bg)] p-4 min-h-[480px] max-h-[700px] overflow-auto mono text-[13px] leading-[1.8]">
           <JsonTree :data="treeData" :root="true" />
         </div>
-        <!-- Text output for others -->
-        <textarea v-else :value="output" readonly class="!min-h-[480px] !text-[12px] !text-[var(--accent)]" placeholder="结果..." />
+        <!-- Text output with line numbers -->
+        <CodeEditor v-else :modelValue="output" :readonly="true" placeholder="结果..." minHeight="480px" textClass="!text-[var(--accent)]" />
       </div>
     </div>
 
