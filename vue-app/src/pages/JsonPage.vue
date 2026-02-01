@@ -9,7 +9,6 @@ import { jsonToCode, fileExtMap } from '../composables/useJsonToCode.js'
 
 const { save, getLast } = useHistory('json')
 
-const modes = ['格式化', '压缩', '校验', '转义', '去转义']
 const selected = ref('格式化')
 const input = ref('')
 const error = ref('')
@@ -30,7 +29,6 @@ onMounted(() => {
   if (last) { input.value = last; nextTick(() => run()) }
 })
 
-watch(selected, () => { if (input.value.trim()) run() })
 watch([codeLang, useCamelCase], generateCode)
 
 function run() {
@@ -39,7 +37,6 @@ function run() {
   try {
     switch (selected.value) {
       case '格式化': {
-        // 先尝试去转义（处理双重转义的 JSON 字符串）
         let raw = input.value.trim()
         try {
           const unescaped = JSON.parse(raw)
@@ -86,7 +83,6 @@ const showCamelOption = computed(() => ['Objective-C', 'Swift'].includes(codeLan
 
 let editTimer = null
 function onInputEdit(val) {
-  // 手动编辑时延迟重新校验和生成代码
   clearTimeout(editTimer)
   editTimer = setTimeout(() => {
     if (!val.trim()) { isValid.value = null; error.value = ''; codeOutput.value = ''; treeData.value = null; return }
@@ -105,70 +101,74 @@ function onInputEdit(val) {
   <div>
     <div class="tool-header fade">
       <h1>JSON 工具</h1>
-      <p>点击操作按钮即时执行，右侧生成语法高亮代码</p>
+      <p>格式化 / 压缩 / 校验 / 转义 + 代码生成</p>
     </div>
 
-    <!-- Mode pills -->
-    <div class="flex flex-wrap gap-1.5 mb-4">
-      <button
-        v-for="m in modes" :key="m"
-        :class="['px-3 py-1 text-[12px] mono rounded border transition-all duration-150 cursor-pointer',
-          selected === m ? 'bg-[var(--accent)] border-[var(--accent)] text-black font-semibold'
-            : 'bg-transparent border-[var(--border)] text-[var(--text-2)] hover:border-[var(--text-3)] hover:text-[var(--text-1)]']"
-        @click="selected = m; run()"
-      >{{ m }}</button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
-      <!-- Left: Content -->
-      <div class="flex flex-col gap-1">
-        <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium flex items-center gap-2">
-          内容 <CopyBtn :value="input" />
-        </label>
-        <div :class="['flex flex-col rounded overflow-hidden transition-colors duration-200 flex-1',
-          isValid === true ? 'border-2 border-emerald-500/60' : isValid === false ? 'border-2 border-red-500/60' : 'border border-[var(--border)]']">
-          <CodeEditor v-model="input" placeholder='输入或粘贴 JSON...' minHeight="500px" @update:modelValue="onInputEdit" />
-          <div v-if="isValid === false" class="px-3 py-2 bg-red-500/10 border-t border-red-500/30 text-red-400 text-[12px] mono">
-            ❌ {{ error }}
+    <!-- 三栏布局 -->
+    <div class="io-layout fade d1">
+      <!-- Left: JSON Editor -->
+      <div class="io-box">
+        <div class="io-top">
+          <div class="io-title">
+            <div :class="['io-dot', isValid === true ? '!bg-[var(--green)]' : isValid === false ? '!bg-red-500' : '']"></div>
+            JSON 内容
           </div>
-          <div v-else-if="isValid === true && selected === '校验'" class="px-3 py-2 bg-emerald-500/10 border-t border-emerald-500/30 text-emerald-400 text-[12px] mono">
-            ✅ JSON 格式校验通过
+          <div class="io-btns">
+            <CopyBtn :value="input" />
           </div>
+        </div>
+        <CodeEditor v-model="input" placeholder="输入或粘贴 JSON..." minHeight="calc(100vh - 300px)" @update:modelValue="onInputEdit" />
+        <div v-if="isValid === false" class="px-3 py-2 bg-red-500/10 border-t border-red-500/30 text-red-400 text-[12px] mono">
+          {{ error }}
+        </div>
+        <div v-else-if="isValid === true && selected === '校验'" class="px-3 py-2 bg-emerald-500/10 border-t border-emerald-500/30 text-emerald-400 text-[12px] mono">
+          JSON 格式校验通过
         </div>
       </div>
 
-      <!-- Right: Code -->
-      <div class="flex flex-col gap-1">
-        <div class="flex items-center gap-2 flex-wrap">
-          <label class="text-[11px] text-[var(--text-3)] uppercase tracking-wide font-medium">转为代码</label>
-          <select v-model="codeLang" class="!w-auto !text-[11px] !py-1 !px-2 !font-sans">
-            <option v-for="lang in codeLangs" :key="lang">{{ lang }}</option>
-          </select>
-          <!-- CamelCase toggle for OC/Swift -->
-          <label v-if="showCamelOption" class="flex items-center gap-1.5 text-[11px] text-[var(--text-2)] cursor-pointer select-none">
+      <!-- Center: Config + Actions -->
+      <div class="io-center">
+        <div class="center-config">
+          <div class="cc-group">
+            <span class="cc-label">操作</span>
+            <select class="cc-select" v-model="selected">
+              <option>格式化</option><option>压缩</option><option>校验</option><option>转义</option><option>去转义</option>
+            </select>
+          </div>
+          <div class="cc-group">
+            <span class="cc-label">目标语言</span>
+            <select class="cc-select" v-model="codeLang">
+              <option v-for="lang in codeLangs" :key="lang">{{ lang }}</option>
+            </select>
+          </div>
+          <label v-if="showCamelOption" class="flex items-center gap-1.5 text-[10px] text-[var(--text-2)] cursor-pointer select-none mt-1">
             <input type="checkbox" v-model="useCamelCase" class="!w-3 !h-3 accent-[var(--accent)]" />
             下划线转驼峰
           </label>
-          <div class="flex-1"></div>
-          <CopyBtn :value="codeOutput" />
-          <button
-            v-if="codeOutput"
-            class="px-2 py-0.5 text-[11px] border border-[var(--border)] rounded text-[var(--text-3)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-colors cursor-pointer flex items-center gap-1"
-            @click="downloadCode"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-3 h-3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            下载
-          </button>
         </div>
-        <div class="border border-[var(--border)] rounded overflow-hidden flex-1">
+        <div class="center-actions">
+          <button class="ca-btn primary" @click="run"><span class="btn-text">执行</span></button>
+          <button v-if="codeOutput" class="ca-btn" @click="downloadCode"><span class="btn-text">下载代码</span></button>
+        </div>
+      </div>
+
+      <!-- Right: Code Output -->
+      <div class="io-box">
+        <div class="io-top">
+          <div class="io-title"><div class="io-dot out"></div>代码输出 · {{ codeLang }}</div>
+          <div class="io-btns">
+            <CopyBtn :value="codeOutput" />
+          </div>
+        </div>
+        <div class="flex-1 min-h-0 overflow-auto">
           <CodeHighlight
             v-if="codeOutput"
             :code="codeOutput"
             :language="codeLang"
-            minHeight="500px"
+            minHeight="calc(100vh - 300px)"
           />
-          <div v-else class="p-4 min-h-[500px] flex items-center justify-center text-[var(--text-3)] text-[13px] mono">
-            输入有效 JSON 后自动生成代码...
+          <div v-else class="p-4 flex items-center justify-center text-[var(--text-3)] text-[13px] mono" style="min-height:calc(100vh - 300px)">
+            输入有效 JSON 后自动生成代码…
           </div>
         </div>
       </div>
